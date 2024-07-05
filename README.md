@@ -1,5 +1,5 @@
 # Generative One-For-All (GOFA)
- The source code for paper GOFA: A  generative one-for-all model for joint graph language modeling. The code is still under cleaning. Will come out soon.
+ The source code for paper GOFA: A  generative one-for-all model for joint graph language modeling. The code is still under clean and will come out soon.
 
 ## Installation Guide.
 First, clone the code repository and move to the code file. Then, create corresponding environment. We provide environment configuration:
