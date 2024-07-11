@@ -1,0 +1,41 @@
+run_mode: "ft"
+load_model: True
+load_dir: "your_pretrained_model_path"
+last_epochs: 0
+num_epochs: 1
+mode: autoencoder
+batch_size: 1
+lr: 0.0001
+l2: 0.0
+selections: True
+llm_max_length: 256
+
+train_task_names:
+  - pubmed_link
+sample_size_per_task:
+  - 40000
+hops:
+  - 3
+
+train_max_nodes_per_hops:
+  - 5
+ways: 5
+instructs: True
+
+eval_task_names:
+  - cora_link
+inf_sample_size_per_task: 1.0
+inf_hops:
+  - 3
+inf_max_nodes_per_hops:
+  - 10
+inf_ways:
+  - -1
+
+inf_instructs:
+  - True
+
+inf_selections:
+  - True
+
+dec_lora: True

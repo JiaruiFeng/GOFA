@@ -1,0 +1,1 @@
+python run_gofa.py --override ./configs/instruct_dev_config.yaml

@@ -1,0 +1,1 @@
+python run_gofa.py --override ./configs/supervised_dev_config.yaml

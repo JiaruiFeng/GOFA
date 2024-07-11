@@ -1,0 +1,90 @@
+root_path: ""
+data_root_path: "./TAGDataset"
+num_bases: 4
+emb_dim: 1024
+num_layers: 6
+mlp_type: "gp"
+dropout: 0.0
+JK: "last"
+lr: 0.0001
+l2: 0.1
+grad_clip: 0.5
+num_epochs: 1
+last_epochs: 0
+batch_size: 1
+eval_batch_size: 1
+num_workers: 4
+seed: 1
+data_path:
+offline_log: True
+test_rep: 1
+log_project: "ggama"
+exp_name: "ggama"
+train_sample_size: -1
+eval_sample_size: -1
+rwpe:
+task_names:
+  - arxiv
+llm_name: "icae"
+base_llm: "llama7blora"
+llm_max_length: 128
+llm_b_size: 1
+val_interval: 1
+load_texts: True
+mode: "nograph"
+temp: 0.1
+compressed_layer: 32
+max_nodes_per_hop: 5
+grad_acc_step: 4
+save_model:
+  save: True
+  steps:
+  monitor: False
+  time: 5
+  epochs:
+  top_k: -1
+  last: True
+load_dir: "./best_ckpt.pth"
+load_model: False
+last_save: True
+training_precision: "bf16-mixed"
+ckpt_path:
+run_mode: "pretrain"
+dec_lora: False
+node_text: False
+
+train_data_multiples: 1.0
+selections: True
+
+train_task_names:
+  - arxiv
+sample_size_per_task:
+  - 20000
+hops:
+  - 3
+
+train_max_nodes_per_hops:
+  - 10
+ways: 5
+save_suffix: "instruct_ft_scheck"
+instructs: True
+
+
+eval_task_names:
+  - cora_node
+
+inf_hops:
+  - 3
+
+inf_max_nodes_per_hops:
+  - 10
+
+inf_ways:
+  - 7
+
+inf_instructs:
+  - True
+
+inf_selections:
+  - True
+

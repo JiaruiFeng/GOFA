@@ -1,5 +1,5 @@
 # Generative One-For-All (GOFA)
- The source code for paper GOFA: A  generative one-for-all model for joint graph language modeling. The code is still under clean and will come out soon.
+ The source code for paper GOFA: A  generative one-for-all model for joint graph language modeling. The code is still under clean. Feel free to open an issue in Github if you encounter any problem. 
 
 ## Installation Guide.
 First, clone the code repository and move to the code file. Then, create corresponding environment. We provide environment configuration:
@@ -14,10 +14,12 @@ Finally, clone the dataset code from [TAGLAS](https://github.com/JiaruiFeng/TAGL
 ```
 git clone https://github.com/JiaruiFeng/TAGLAS.git
 ```
-If you want to reproduce the results of GOFA on fine-tuning tasks, you can download the pretrained checkpoint from [here](https://huggingface.co/WFRaain/GOFA/tree/main)
-We provide checkpoint for both Llama2 (`qamag03_best_ckpt.pth`) and Mistral (`mistral_qamag03_best_ckpt.pth`). 
+If you want to reproduce the results of GOFA on fine-tuning tasks, you can download the pretrained checkpoint from [here](https://huggingface.co/WFRaain/GOFA/tree/main).
+We provide checkpoints for both Llama2 (`qamag03_best_ckpt.pth`) and Mistral (`mistral_qamag03_best_ckpt.pth`). 
 
 ## Pre-training
+Pre-training require large computation resource and time. If you want to explore GOFA, we recommend you to download our pre-trained checkpoints and directly run downstream fine-tuning.
+
 To reproduce pretraining result, please generate pretraining data using the following script. 
 
 ```
@@ -25,27 +27,27 @@ python pretrain_data_generation.py
 ```
 The above code will generate three pretrain data subset. Note that the generation process require huge memory and will last for long time. Please allocate enough resource for generation.
 
-After data generation, run the following line to start pretraining:
+After data generation, run the following line to start the pretraining:
 ```
-python run_gofa.py
+python run_gofa.py --override ./configs/pretrain_config.yaml
 ```
 This code will run pretraining of the GOFA llama2 version on the first pretrain data subset. if you want to train the mistral version, run:
 ```
-python run_gofa.py base_llm mistral7b
+python run_gofa.py --override ./configs/pretrain_config.yaml base_llm mistral7b
 ```
-To continue the training on next subset, check the `last_epochs` in the `./configs/default_config.yaml` to 1/2 and `ckpt_path` to the saved checkpoint on the last pretraining.
+To continue the training on next subset, check the `last_epochs` in the `./configs/default_config.yaml` to the next batch and `ckpt_path` to the saved checkpoint on the last pretraining.
 
 ## Instruction fine-tuning for zero-shot experiment.
 To reproduce results of GOFA on zero-shot learning with arxiv instruction tuning, run:
 ```
-python run_gofa.py --override ./configs/zs_arxiv_config.yaml load_dir llama_pretrained_model_pth base_llm llama7b
-python run_gofa.py --override ./configs/zs_arxiv_config.yaml load_dir mistral_pretrained_model_pth base_llm mistral7b
+python run_gofa.py --override ./configs/instruct_arxiv_config.yaml load_dir llama_pretrained_model_pth base_llm llama7b
+python run_gofa.py --override ./configs/instruct_arxiv_config.yaml load_dir mistral_pretrained_model_pth base_llm mistral7b
 ```
-Please change the load_dir to the corresponding downloaded pretrain checkpoints.
+Please change the load_dir to the corresponding downloaded checkpoints.
 
 To reproduce results of GOFA on zero-shot learning with pubmed link instruction tuning, run:
 ```
-python run_gofa.py --override ./configs/zs_pubmed_config.yaml load_dir mistral_pretrained_model_pth base_llm mistral7b
+python run_gofa.py --override ./configs/instruct_pubmed_config.yaml load_dir mistral_pretrained_model_pth base_llm mistral7b
 ```
 
 ## Supervised fine-tuning.
@@ -60,7 +62,8 @@ To explore the generation result of GOFA, you can also directly run the inferenc
 ```
 python run_gofa.py --override ./configs/inference_config.yaml load_dir finetuned_model_pth base_llm llama7b
 ```
-Please modify the config file for selecting corresponding dataset.
+Please modify the config file for selecting corresponding dataset. Note that for both zero-shot and supervised experiment, the
+trained model should be evaluated under inference model to obtain the correct evaluation result. 
 
 
 
