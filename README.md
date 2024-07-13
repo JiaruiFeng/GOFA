@@ -2,25 +2,25 @@
  The source code for paper GOFA: A  generative one-for-all model for joint graph language modeling. The code is still under clean. Feel free to open an issue in Github if you encounter any problem. 
 
 ## Installation Guide.
-First, clone the code repository and move to the code file. Then, create corresponding environment. We provide environment configuration:
+First, clone the code repository and move to the code file. Then, create the python environment. We provide environment configuration:
 ```
 conda env create -f environment.yml
 ```
 
-Next, please download the checkpoint of ICAE from [here](https://huggingface.co/sggetao/icae/tree/main). Specifically, download and put
+Next, please download the pretrained checkpoint of ICAE from [here](https://huggingface.co/sggetao/icae/tree/main). Specifically, download and put
 the following files `llama-2-7b-chat-finetuned-icae_zeroweight_llama2.pt` and `mistral_7b_pretrained_icae.safetensors` into directory `./cache_data/model/`
 
-Finally, clone the dataset code from [TAGLAS](https://github.com/JiaruiFeng/TAGLAS) by running:
+Finally, clone the code of datasets we used from [TAGLAS](https://github.com/JiaruiFeng/TAGLAS) by running:
 ```
 git clone https://github.com/JiaruiFeng/TAGLAS.git
 ```
-If you want to reproduce the results of GOFA on fine-tuning tasks, you can download the pretrained checkpoint from [here](https://huggingface.co/WFRaain/GOFA/tree/main).
-We provide checkpoints for both Llama2 (`qamag03_best_ckpt.pth`) and Mistral (`mistral_qamag03_best_ckpt.pth`). 
+
 
 ## Pre-training
-Pre-training require large computation resource and time. If you want to explore GOFA, we recommend you to download our pre-trained checkpoints and directly run downstream fine-tuning.
+Pre-training require large computation resource and time. If you want to explore GOFA, we recommend you to download our pre-trained checkpoints and directly run downstream fine-tuning. You can download checkpoints from [here](https://huggingface.co/WFRaain/GOFA/tree/main).
+We provide checkpoints for both Llama2 (`qamag03_best_ckpt.pth`) and Mistral (`mistral_qamag03_best_ckpt.pth`). 
 
-To reproduce pretraining result, please generate pretraining data using the following script. 
+To run the pretraining by yourself, please first generate pretraining data using the following script. 
 
 ```
 python pretrain_data_generation.py
@@ -38,20 +38,20 @@ python run_gofa.py --override ./configs/pretrain_config.yaml base_llm mistral7b
 To continue the training on next subset, check the `last_epochs` in the `./configs/default_config.yaml` to the next batch and `ckpt_path` to the saved checkpoint on the last pretraining.
 
 ## Instruction fine-tuning for zero-shot experiment.
-To reproduce results of GOFA on zero-shot learning with arxiv instruction tuning, run:
+To repeat the experiments of GOFA on zero-shot learning with arxiv instruction tuning, run:
 ```
 python run_gofa.py --override ./configs/instruct_arxiv_config.yaml load_dir llama_pretrained_model_pth base_llm llama7b
 python run_gofa.py --override ./configs/instruct_arxiv_config.yaml load_dir mistral_pretrained_model_pth base_llm mistral7b
 ```
-Please change the load_dir to the corresponding downloaded checkpoints.
+Please change the `load_dir` to either the corresponding downloaded checkpoints or your own pretrained checkpoints.
 
-To reproduce results of GOFA on zero-shot learning with pubmed link instruction tuning, run:
+Similarly, to repeat the experiments of GOFA on zero-shot learning with pubmed link instruction tuning, run:
 ```
 python run_gofa.py --override ./configs/instruct_pubmed_config.yaml load_dir mistral_pretrained_model_pth base_llm mistral7b
 ```
 
 ## Supervised fine-tuning.
-To reproduce results of GOFA on supervised learning, run:
+To repeat the experiments of GOFA on supervised learning, run:
 ```
 python run_gofa.py --override ./configs/supervised_config.yaml load_dir pretrained_model_pth base_llm model_type
 ```
@@ -64,6 +64,9 @@ python run_gofa.py --override ./configs/inference_config.yaml load_dir finetuned
 ```
 Please modify the config file for selecting corresponding dataset. Note that for both zero-shot and supervised experiment, the
 trained model should be evaluated under inference model to obtain the correct evaluation result. 
+
+We also provide checkpoint of mistral version of GOFA on arxiv instruction-tuning in [here](https://huggingface.co/WFRaain/GOFA/tree/main) with file name `nb_instruct.pth`. 
+You can use this checkpoint to directly reproduce the results in the paper. 
 
 
 

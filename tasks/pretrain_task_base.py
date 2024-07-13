@@ -14,6 +14,8 @@ from random import randint
 
 
 def get_pretrain_task(tasks: Union[str, list[str]], **kwargs):
+    """Get pretrain task function given task name.
+    """
     if isinstance(tasks, str):
         tasks = [tasks]
 
@@ -36,6 +38,11 @@ def get_pretrain_task(tasks: Union[str, list[str]], **kwargs):
 
 
 class PretrainTaskBase(ABC):
+    r"""Base class for defining a pretrain task.
+    The class is designed based on task generation process of TAGLAS. the logic of pretrain tasks generation should be
+    defined in three functions, which corresponding to the three functions in the TAGLAS task generation. It will be injected
+    into the TAGLAS task generation when be called.
+    """
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -56,6 +63,12 @@ class PretrainTaskBase(ABC):
 
 
 class CompleteSentence(PretrainTaskBase):
+    r"""Complete sentence pretrain task. If will mask the node text of each target node in the task sample and ask the model
+    to complete the mask part. If num_additional_sentences is larger than 0, will additional sample nodes from the input graph.
+    Args:
+        num_additional_sentences (int): The number of additional nodes for the sentence completion besides the target node set.
+        left_keep_length (int): For the sentence, the mask start position.
+    """
     def __init__(self, num_additional_sentences: int = 0, left_keep_length: int = 0, **kwargs):
         super().__init__(**kwargs)
         self.num_additional_sentences = num_additional_sentences
@@ -124,6 +137,11 @@ class CompleteSentence(PretrainTaskBase):
 
 
 class ShortestPath(PretrainTaskBase):
+    r"""Shortest path pretrain task. It will generate task to ask model the shortest path and SPD between node pairs in the task graph sample.
+    Args:
+        num_SP (int): Number of node pair to include.
+        from_target (bool): If ture, one node in the node pair will be the target node.
+    """
     def __init__(self, num_SP: int = 1, from_target=True, **kwargs):
         super().__init__(**kwargs)
         self.num_SP = num_SP
@@ -169,7 +187,7 @@ class ShortestPath(PretrainTaskBase):
         target_index_list = []
         for _ in range(self.num_SP):
             if self.from_target:
-                i = target_index.item()
+                i = target_index[torch.randperm(len(target_index))[0]].item()
                 j = randint(0, num_nodes-1)
             else:
                 node_pair = torch.randperm(num_nodes)[:2]
@@ -211,6 +229,12 @@ class ShortestPath(PretrainTaskBase):
 
 
 class CommonNeighbors(PretrainTaskBase):
+    r"""Common neighbor pretrain task. It will generate task to ask model the number and exact list of common neighbors
+        between node pairs in the task graph sample.
+    Args:
+        num_CN (int): Number of node pair to include.
+        from_target (bool): If ture, one node in the node pair will be the target node.
+    """
     def __init__(self, num_CN: int=1, from_target=True, **kwargs):
         self.num_CN = num_CN
         self.from_target = from_target
@@ -248,7 +272,7 @@ class CommonNeighbors(PretrainTaskBase):
         target_index_list = []
         for _ in range(self.num_CN):
             if self.from_target:
-                i = target_index.item()
+                i = target_index[torch.randperm(len(target_index))[0]].item()
                 j = randint(0, num_nodes-1)
             else:
                 node_pair = torch.randperm(num_nodes)[:2]

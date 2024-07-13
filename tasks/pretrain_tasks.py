@@ -13,38 +13,23 @@ from .pretrain_task_base import get_pretrain_task
 
 
 class GOFAGraphPretrainTask(GQATask):
-    def __init__(self, subset_range: Optional[list] = None, **kwargs):
-        self.subset_range = subset_range
+    r"""GOFA graph-level pretrain task class.
+    """
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def __before_build_task__(self):
-        super().__before_build_task__()
-        if self.subset_range is not None:
-            assert max(self.subset_range) >= self.sample_indexs.size(0) + 1, "The subset range should be larger than total sample size."
-            self.sample_indexs = self.__sample_slice__(self.sample_indexs, self.subset_range)
-            self.sample_labels = self.__sample_slice__(self.sample_labels, self.subset_range)
-            self.sample_label_map = self.__sample_slice__(self.sample_label_map, self.subset_range)
 
 
 class GOFANodePretrainTask(NQATask):
+    r"""GOFA node-level pretrain task class. Will load corresponding pretrain tasks given input.
+    """
     def __init__(
             self,
-            subset_range: Optional[list] = None,
             pretrain_tasks: list[str] = ["CS"],
             **kwargs):
-        self.subset_range = subset_range
-        assert len(pretrain_tasks) > 0, "Must include at least one pretrain task"
         self.pretrain_tasks = get_pretrain_task(pretrain_tasks, **kwargs)
         super().__init__(**kwargs)
 
-    def __before_build_task__(self):
-        super().__before_build_task__()
-        if self.subset_range is not None:
-            assert max(self.subset_range) >= self.sample_indexs.size(
-                0) + 1, "The subset range should be larger than total sample size."
-            self.sample_indexs = self.__sample_slice__(self.sample_indexs, self.subset_range)
-            self.sample_labels = self.__sample_slice__(self.sample_labels, self.subset_range)
-            self.sample_label_map = self.__sample_slice__(self.sample_label_map, self.subset_range)
 
     def __before_process__(self) -> None:
         super().__before_process__()
@@ -151,5 +136,9 @@ class GOFANodePretrainTask(NQATask):
 
 
 class GOFALinkPretrainTask(LQATask):
-    pass
+    r"""GOFA link-level pretrain task class.
+
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 

@@ -26,7 +26,7 @@ def generate_node_id(num_nodes):
 
 
 def construct_prompt_graph(num_nodes: int, question_indexs: list, single_direction=False):
-    """
+    r"""
     Construct and return the prompt graph given num_nodes in the original graph and question_indexs.
     Question_indexs should be a list and each element save the all node indexs of the question.
     """
@@ -82,9 +82,9 @@ def add_prompt_graph_to_data(
     return data
 
 
-def build_GOFA_task_graph(
-        data, add_prompt_graph=True, is_pretrain=False, single_direction=False, **kwargs):
-    """
+def build_GOFA_task_graph(data, add_prompt_graph=True, is_pretrain=False, single_direction=False, **kwargs):
+    r"""GOFA task graph construction function. This function will 1. add node id to nodes in the graph.
+    2.specify the Node of generation, either be the target node or add prompt node to the graph.
     if is_pretrain set to False, set to fine-tune model, will assume each graph only contain one QA pair.
     Otherwise, assume the data come with multiple questions and answers. For both two modes, function will automatically
     add prompt node to the graph if question related to more than one node. Otherwise, add prompt node if add_prompt_graph=True.

@@ -11,7 +11,7 @@ def sample_k_labels_with_true(
         full_label_list: Union[list[str], np.ndarray],
         true_label_idx: int,
         way: int = 10) -> list[str]:
-    """
+    r"""
     Sample k labels from a complete label list containing the true label, ensuring that the true label is included
     in the sampled set.
 

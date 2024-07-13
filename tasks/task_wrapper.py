@@ -20,21 +20,39 @@ from .pretrain_datasets import get_pretrain_dataset
 from .pretrain_tasks import GOFAGraphPretrainTask, GOFALinkPretrainTask, GOFANodePretrainTask
 
 class GOFATaskWrapper(DatasetWithCollate, ABC):
+    r"""GOFA task wrapper base class. Use to wrap multiple tasks together.
+    Args:
+        task_names (Union[list[str], str]): task key to retrieve corresponding tasks.
+        root (str): Root directory for saving dataset.
+        split (str): Dataset split.
+        save_data (bool): If true, will save all generated tasks in root directory.
+        from_saved (bool): If ture, will first try to load saved tasks instead of generating a new one.
+        save_name (str, optional): If specified, the generated tasks will be saved with the specified name instead of the default name.
+        post_funcs (Union[list[Callable], Callable], optional): post-process function for further process each task sample. Will be called in __get_item__.
+        filter_func (Callable, optional): data filter function, should return None if data meet filtering condition and original data otherwise.
+        sample_size (Union[float, int, list]): sampling parameter for each task. If it is float, will sample the data
+            precentagewise. If it is int, sample exact number of data the sample_size is. If it is list, try to sample
+            the corresponding  index in the task.
+        sample_mode (str): Sample mode for data sampling. Choose from random, balanced, and stratified.
+        hop (Union[int, list[int]]): number of hop in subgraph sampling.
+        max_nodes_per_hop (Union[int, list[int]]): maximum number of nodes per hop in subgraph sampling.
+        num_workers (int): Number of workers when generating the task.
+    """
     def __init__(
             self,
             task_names: Union[list[str], str],
-            root: Optional[str] = "TAGDataset",
-            split: Optional[str] = "train",
-            save_data: Optional[bool] = False,
-            from_saved: Optional[bool] = False,
+            root: str = "TAGDataset",
+            split: str = "train",
+            save_data: bool = False,
+            from_saved: bool = False,
             save_name: Optional[str] = None,
             post_funcs: Optional[Union[list[Callable], Callable]] = None,
             filter_func: Optional[Callable] = None,
-            sample_size: Optional[Union[float, int, list]] = 1.0,
-            sample_mode: Optional[str] = "random",
-            hop: Optional[Union[int, list[int]]] = 3,
-            max_nodes_per_hop: Optional[Union[int, list[int]]] = 5,
-            num_workers: Optional[int] = 0,
+            sample_size: Union[float, int, list] = 1.0,
+            sample_mode: str = "random",
+            hop: Union[int, list[int]] = 3,
+            max_nodes_per_hop: Union[int, list[int]] = 5,
+            num_workers: int = 0,
             **kwargs):
         super().__init__()
         if isinstance(task_names, str):
@@ -118,6 +136,26 @@ class GOFATaskWrapper(DatasetWithCollate, ABC):
 
 
 class GOFAPretrainTaskWrapper(GOFATaskWrapper):
+    r"""GOFA task wrapper base class. Use to wrap multiple tasks together.
+    Args:
+        task_names (Union[list[str], str]): task key to retrieve corresponding tasks.
+        root (str): Root directory for saving dataset.
+        split (str): Dataset split.
+        save_data (bool): If true, will save all generated tasks in root directory.
+        from_saved (bool): If ture, will first try to load saved tasks instead of generating a new one.
+        save_name (str, optional): If specified, the generated tasks will be saved with the specified name instead of the default name.
+        post_funcs (Union[list[Callable], Callable], optional): post-process function for further process each task sample. Will be called in __get_item__.
+        filter_func (Callable, optional): data filter function, should return None if data meet filtering condition and original data otherwise.
+        sample_size (Union[float, int, list]): sampling parameter for each task. If it is float, will sample the data
+            precentagewise. If it is int, sample exact number of data the sample_size is. If it is list, try to sample
+            the corresponding  index in the task.
+        sample_mode (str): Sample mode for data sampling. Choose from random, balanced, and stratified.
+        hop (Union[int, list[int]]): number of hop in subgraph sampling.
+        max_nodes_per_hop (Union[int, list[int]]): maximum number of nodes per hop in subgraph sampling.
+        num_workers (int): Number of workers when generating the task.
+        pretrain_tasks (list[str]): The pretrain tasks used for pretraining.
+    """
+
     def __init__(
             self,
             task_names: Union[list[str], str],
@@ -130,7 +168,6 @@ class GOFAPretrainTaskWrapper(GOFATaskWrapper):
             filter_func: Optional[Callable] = None,
             sample_size: Optional[Union[float, int, list]] = 1.0,
             sample_mode: Optional[str] = "random",
-            subset_ranges: Optional[list] = None,
             hop: Optional[Union[int, list[int]]] = 3,
             max_nodes_per_hop: Optional[Union[int, list[int]]] = 5,
             num_workers: Optional[int] = 0,
@@ -140,7 +177,6 @@ class GOFAPretrainTaskWrapper(GOFATaskWrapper):
         if isinstance(task_names, str):
             task_names = [task_names]
         self.num_tasks = len(task_names)
-        self.subset_ranges = self.__parse_input_args__(subset_ranges, self.num_tasks, is_list=True, default_none=True)
         self.pretrain_tasks = self.__parse_input_args__(pretrain_tasks, self.num_tasks, is_list=True)
         super().__init__(task_names, root, split, save_data, from_saved, save_name, post_funcs, filter_func,
                          sample_size, sample_mode, hop, max_nodes_per_hop, num_workers, **kwargs)
@@ -155,7 +191,6 @@ class GOFAPretrainTaskWrapper(GOFATaskWrapper):
             from_saved: bool = True,
             save_name: Optional[str] = None,
             filter_func: Optional[Callable] = None,
-            subset_range: Optional[list] = None,
             sample_size: Union[int, float] = 1.0,
             sample_mode: str = "random",
             hop: int = 3,
@@ -180,18 +215,13 @@ class GOFAPretrainTaskWrapper(GOFATaskWrapper):
 
         if name in ["ultrachat200k"]:
             return GOFAGraphPretrainTask(dataset=dataset, split=split, save_data=save_data, from_saved=from_saved,
-                                         save_name=save_name, post_funcs=post_funcs, filter_func=filter_func,
-                                         sample_size=sample_size,
-                                         sample_mode=sample_mode, num_workers=num_workers, subset_range=subset_range,
-                                         **kwargs)
+                                save_name=save_name, post_funcs=post_funcs, filter_func=filter_func,
+                                sample_size=sample_size, sample_mode=sample_mode, num_workers=num_workers, **kwargs)
         elif name in ["mag240m", "arxiv", "products", "wikics", "cora", "cora_node", "pubmed", "pubmed_node"]:
             return GOFANodePretrainTask(dataset=dataset, split=split, save_data=save_data, from_saved=from_saved,
-                                        save_name=save_name, post_funcs=post_funcs, filter_func=filter_func,
-                                        sample_size=sample_size,
-                                        sample_mode=sample_mode, num_workers=num_workers, hop=hop,
-                                        max_nodes_per_hop=max_nodes_per_hop,
-                                        pretrain_tasks=pretrain_tasks,
-                                        subset_range=subset_range, **kwargs)
+                                save_name=save_name, post_funcs=post_funcs, filter_func=filter_func,
+                                sample_size=sample_size, sample_mode=sample_mode, num_workers=num_workers, hop=hop,
+                                max_nodes_per_hop=max_nodes_per_hop, pretrain_tasks=pretrain_tasks, **kwargs)
         else:
             raise NotImplementedError(f"Pretrain task for the dataset {name} is not implemented yet.")
 
@@ -208,7 +238,6 @@ class GOFAPretrainTaskWrapper(GOFATaskWrapper):
                 filter_func=self.filter_funcs[i],
                 sample_size=self.sample_sizes[i],
                 sample_mode=self.sample_modes[i],
-                subset_range=self.subset_ranges[i],
                 hop=self.hops[i],
                 max_nodes_per_hop=self.max_nodes_per_hops[i],
                 num_workers=self.num_workers[i],
@@ -219,6 +248,28 @@ class GOFAPretrainTaskWrapper(GOFATaskWrapper):
 
 
 class GOFAFineTuneTaskWrapper(GOFATaskWrapper):
+    r"""GOFA task wrapper base class. Use to wrap multiple tasks together.
+    Args:
+        task_names (Union[list[str], str]): task key to retrieve corresponding tasks.
+        root (str): Root directory for saving dataset.
+        split (str): Dataset split.
+        save_data (bool): If true, will save all generated tasks in root directory.
+        from_saved (bool): If ture, will first try to load saved tasks instead of generating a new one.
+        save_name (str, optional): If specified, the generated tasks will be saved with the specified name instead of the default name.
+        post_funcs (Union[list[Callable], Callable], optional): post-process function for further process each task sample. Will be called in __get_item__.
+        filter_func (Callable, optional): data filter function, should return None if data meet filtering condition and original data otherwise.
+        sample_size (Union[float, int, list]): sampling parameter for each task. If it is float, will sample the data
+            precentagewise. If it is int, sample exact number of data the sample_size is. If it is list, try to sample
+            the corresponding  index in the task.
+        sample_mode (str): Sample mode for data sampling. Choose from random, balanced, and stratified.
+        hop (Union[int, list[int]]): number of hop in subgraph sampling.
+        max_nodes_per_hop (Union[int, list[int]]): maximum number of nodes per hop in subgraph sampling.
+        num_workers (int): Number of workers when generating the task.
+        selection (bool): If true, will generate multiple answer candidates in question and ask the model to select the true one.
+        way (int): Number of answer candidates will provide.
+        instruct (bool): If true, will also provide a description for each answer candidate.
+    """
+
     def __init__(
             self,
             task_names: Union[list[str], str],
