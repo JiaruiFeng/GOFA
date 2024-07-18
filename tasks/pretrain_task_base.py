@@ -11,6 +11,7 @@ from TAGLAS.tasks import BaseTask
 import torch
 import networkx as nx
 from random import randint
+from TAGLAS.tasks.process import value_to_tensor
 
 
 def get_pretrain_task(tasks: Union[str, list[str]], **kwargs):
@@ -22,15 +23,18 @@ def get_pretrain_task(tasks: Union[str, list[str]], **kwargs):
     return_tasks = []
     for task in tasks:
         if task == "CS":
+            include_targets = True if "include_targets" not in kwargs else kwargs["include_targets"]
             num_additional_sentences = 0 if "num_additional_sentences" not in kwargs else kwargs["num_additional_sentences"]
             left_keep_length = 0 if "left_keep_length" not in kwargs else kwargs["left_keep_length"]
-            return_tasks.append(CompleteSentence(num_additional_sentences, left_keep_length))
+            return_tasks.append(CompleteSentence(include_targets, num_additional_sentences, left_keep_length))
         elif task == "SP":
             num_SP = 1 if "num_SP" not in kwargs else kwargs["num_SP"]
             return_tasks.append(ShortestPath(num_SP))
         elif task == "CN":
             num_CN = 1 if "num_CN" not in kwargs else kwargs["num_CN"]
             return_tasks.append(CommonNeighbors(num_CN))
+        elif task == "DS":
+            return_tasks.append(DownstreamTask())
         else:
             raise ValueError("Task not defined.")
 
@@ -61,16 +65,57 @@ class PretrainTaskBase(ABC):
     def after_process(self, task_class, **kwargs):
         pass
 
+class DownstreamTask(PretrainTaskBase):
+    r"""Use downstream task as pretrain task.
+    """
+    def __init__(self,  **kwargs):
+        super().__init__(**kwargs)
+
+    def before_process(self, task_class, **kwargs):
+        return
+    def build_sample(
+            self,
+            task_class: BaseTask,
+            node_map: LongTensor,
+            edge_index: LongTensor,
+            target_index: LongTensor,
+            label_map: list,
+            **kwargs):
+        question_map, label_map, answer_map = label_map
+        label_map = value_to_tensor(label_map)
+        question_map = value_to_tensor(question_map)
+        answer_map = value_to_tensor(answer_map)
+        question_list = [task_class.question_features[q] for q in question_map]
+        answer_list = [task_class.answer_features[a] for a in answer_map]
+        label_list = [task_class.data.label[l] for l in label_map]
+        target_index = [target_index.tolist()]
+
+        return_dict = {
+            "questions": question_list,
+            "answers": answer_list,
+            "labels": label_list,
+            "target_index": target_index,
+            "node_map": node_map,
+        }
+        return return_dict
+
+    def after_process(self, task_class, **kwargs):
+        return
+
 
 class CompleteSentence(PretrainTaskBase):
     r"""Complete sentence pretrain task. If will mask the node text of each target node in the task sample and ask the model
     to complete the mask part. If num_additional_sentences is larger than 0, will additional sample nodes from the input graph.
     Args:
+        include_targets (bool): If ture, include all target nodes in the graph for the sentence completion.
         num_additional_sentences (int): The number of additional nodes for the sentence completion besides the target node set.
         left_keep_length (int): For the sentence, the mask start position.
     """
-    def __init__(self, num_additional_sentences: int = 0, left_keep_length: int = 0, **kwargs):
+    def __init__(self, include_targets=True, num_additional_sentences: int = 0, left_keep_length: int = 0, **kwargs):
         super().__init__(**kwargs)
+        if not include_targets:
+            assert num_additional_sentences > 0
+        self.include_targets = include_targets
         self.num_additional_sentences = num_additional_sentences
         self.left_keep_length = left_keep_length
 
@@ -100,9 +145,13 @@ class CompleteSentence(PretrainTaskBase):
             target_index: LongTensor,
             **kwargs):
         prompt_template = "Please complete the sentence of the node [NODE_INDEX <index>]"
-
+        if self.include_targets:
+            num_targets = len(target_index)
+        else:
+            num_targets = 0
+            target_index = torch.tensor([], dtype=torch.long)
         num_nodes = node_map.size(0)
-        k = max(min(num_nodes - len(target_index), self.num_additional_sentences), 0)
+        k = max(min(num_nodes - num_targets, self.num_additional_sentences), 0)
         if k > 0:
             target_map = node_map[target_index].tolist()
             select_mask = [False if node in target_map else True for node in node_map]
@@ -115,7 +164,7 @@ class CompleteSentence(PretrainTaskBase):
         selected_index = target_index.tolist() + selected_index
         prompt_list = []
         answer_list = []
-        total_node_texts = len(task_class.data.node_map)
+        total_node_texts = len(task_class.data.x) // 2
         for index in selected_index:
             prompt_list.append(prompt_template.replace("<index>", str(index)))
             answer_list.append(task_class.right_texts[node_map[index]])

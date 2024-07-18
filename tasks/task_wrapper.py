@@ -214,16 +214,18 @@ class GOFAPretrainTaskWrapper(GOFATaskWrapper):
                                            single_direction=single_direction)]
 
         if name in ["ultrachat200k"]:
-            return GOFAGraphPretrainTask(dataset=dataset, split=split, save_data=save_data, from_saved=from_saved,
-                                save_name=save_name, post_funcs=post_funcs, filter_func=filter_func,
-                                sample_size=sample_size, sample_mode=sample_mode, num_workers=num_workers, **kwargs)
+            task_class = GOFAGraphPretrainTask
         elif name in ["mag240m", "arxiv", "products", "wikics", "cora", "cora_node", "pubmed", "pubmed_node"]:
-            return GOFANodePretrainTask(dataset=dataset, split=split, save_data=save_data, from_saved=from_saved,
-                                save_name=save_name, post_funcs=post_funcs, filter_func=filter_func,
-                                sample_size=sample_size, sample_mode=sample_mode, num_workers=num_workers, hop=hop,
-                                max_nodes_per_hop=max_nodes_per_hop, pretrain_tasks=pretrain_tasks, **kwargs)
+            task_class = GOFANodePretrainTask
+        elif name in ["wikikg90m", "fb15k237", "wn18rr"]:
+            task_class = GOFALinkPretrainTask
         else:
             raise NotImplementedError(f"Pretrain task for the dataset {name} is not implemented yet.")
+
+        return task_class(dataset=dataset, split=split, save_data=save_data, from_saved=from_saved,
+                        save_name=save_name, post_funcs=post_funcs, filter_func=filter_func,
+                        sample_size=sample_size, sample_mode=sample_mode, num_workers=num_workers, hop=hop,
+                        max_nodes_per_hop=max_nodes_per_hop, pretrain_tasks=pretrain_tasks, **kwargs)
 
     def __get_task_list__(self):
         task_list = []
