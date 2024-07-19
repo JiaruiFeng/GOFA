@@ -200,9 +200,14 @@ class ShortestPath(PretrainTaskBase):
         # Compute the shortest path between node i and node j
         # return all shortest paths and distance.
         G = nx.from_edgelist(edge_index.numpy().T)
-        path_list = nx.all_shortest_paths(G, i, j)
-        path_list = torch.tensor(list(path_list))
-        return path_list, path_list.size(-1) - 1
+        # check whether i or j is an isolated node or no path exists between i and j
+        has_path = i in G and j in G and nx.has_path(G, i, j)
+        if has_path:
+            path_list = nx.all_shortest_paths(G, i, j)
+            path_list = torch.tensor(list(path_list))
+            return path_list, path_list.size(-1) - 1
+        else:
+            return [], 'inf'
 
     def path_list_to_text(self, path_list, special_token="[NODE_INDEX <index>]"):
         if isinstance(path_list, Tensor):
@@ -245,7 +250,10 @@ class ShortestPath(PretrainTaskBase):
             question = prompt_template.replace("<i>", str(i)).replace("<j>", str(j))
             path_list, spd = self.compute_shortest_paths(i, j, edge_index)
             path_text =self.path_list_to_text(path_list)
-            answer = f"The shortest path distance is {str(spd)}. Shortest paths: " + path_text + "."
+            if len(path_list):
+                answer = f"The shortest path distance is {str(spd)}. Shortest paths: " + path_text + "."
+            else:
+                answer = f"The shortest path distance is {str(spd)}. There is no path between [NODE_INDEX {i}] and [NODE_INDEX {j}]."
             label = str(spd)
             question_list.append(question)
             answer_list.append(answer)
