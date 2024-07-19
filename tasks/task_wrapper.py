@@ -142,7 +142,7 @@ class GOFAPretrainTaskWrapper(GOFATaskWrapper):
         root (str): Root directory for saving dataset.
         split (str): Dataset split.
         save_data (bool): If true, will save all generated tasks in root directory.
-        from_saved (bool): If ture, will first try to load saved tasks instead of generating a new one.
+        from_saved (bool): If true, will first try to load saved tasks instead of generating a new one.
         save_name (str, optional): If specified, the generated tasks will be saved with the specified name instead of the default name.
         post_funcs (Union[list[Callable], Callable], optional): post-process function for further process each task sample. Will be called in __get_item__.
         filter_func (Callable, optional): data filter function, should return None if data meet filtering condition and original data otherwise.
@@ -217,7 +217,7 @@ class GOFAPretrainTaskWrapper(GOFATaskWrapper):
             task_class = GOFAGraphPretrainTask
         elif name in ["mag240m", "arxiv", "products", "wikics", "cora", "cora_node", "pubmed", "pubmed_node"]:
             task_class = GOFANodePretrainTask
-        elif name in ["wikikg90m", "fb15k237", "wn18rr"]:
+        elif name in ["wikikg90m", "fb15k237", "wn18rr", "cora_link", "pubmed_link"]:
             task_class = GOFALinkPretrainTask
         else:
             raise NotImplementedError(f"Pretrain task for the dataset {name} is not implemented yet.")
