@@ -200,7 +200,7 @@ class GOFAPretrainTaskWrapper(GOFATaskWrapper):
             pretrain_tasks: list = ["CS"],
             **kwargs
     ):
-        dataset = get_pretrain_dataset(name, root, **kwargs)
+        dataset = get_pretrain_dataset(name, root, num_workers=num_workers, **kwargs)
         if post_funcs is None:
             post_funcs = []
         add_prompt_graph = False
