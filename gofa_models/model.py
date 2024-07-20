@@ -197,7 +197,7 @@ class GOFA(torch.nn.Module):
             sample_logit = logits[i]
             sample_mask = masks[i]
             sample_logit = sample_logit[sample_mask]
-            token_ids = sample_logit.argmax(dim=-1).unsqueeze(0)
+            token_ids = sample_logit[:, :32000].argmax(dim=-1).unsqueeze(0)
             token_ids[token_ids >= 32000] = 1
             sample_text = tokenizer.batch_decode(token_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True)
             decoded_texts.extend(sample_text)
