@@ -59,16 +59,15 @@ def main(params):
         #                                          Pretrain Task                                             #
         ######################################################################################################
 
-        train_task = GOFAPretrainTaskWrapper(["mag240m", "ultrachat200k"], root=params.data_root_path,
-                                            save_name=f"pretrain_subset_{params.last_epochs}", pretrain_tasks=["CS", "CN", "SP"],
-                                             num_additional_sentences=3, num_SP=3, num_CN=3, num_workers=params.num_workers)
+        train_task = GOFAPretrainTaskWrapper(["mag240m", "ultrachat200k", "wiki_graph", "wikikg90m"], root=params.data_root_path,
+                                            save_name=f"pretrain_{params.last_epochs}")
 
         val_tasks = GOFAPretrainTaskWrapper(["arxiv", "ultrachat200k"], root=params.data_root_path,
-                                            split="val", sample_size=0.01, save_name="pretrain_val",
+                                            split="val", sample_size=100, save_name="pretrain_val",
                                             num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
 
         test_tasks = GOFAPretrainTaskWrapper(["arxiv", "ultrachat200k"], root=params.data_root_path,
-                                            split="val", sample_size=0.01, save_name="pretrain_test",
+                                            split="test", sample_size=100, save_name="pretrain_test",
                                             num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
 
         n_steps = int(len(train_task) * params.num_epochs / (params.grad_acc_step * int(torch.cuda.device_count())))
