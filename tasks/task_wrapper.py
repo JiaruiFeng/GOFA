@@ -213,7 +213,7 @@ class GOFAPretrainTaskWrapper(GOFATaskWrapper):
         post_funcs = post_funcs + [partial(build_GOFA_task_graph, is_pretrain=True, add_prompt_graph=add_prompt_graph,
                                            single_direction=single_direction)]
 
-        if name in ["ultrachat200k"]:
+        if name in ["ultrachat200k", "wiki_graph"]:
             task_class = GOFAGraphPretrainTask
         elif name in ["mag240m", "arxiv", "products", "wikics", "cora", "cora_node", "pubmed", "pubmed_node"]:
             task_class = GOFANodePretrainTask
