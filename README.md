@@ -1,5 +1,5 @@
 # Generative One-For-All (GOFA)
- The source code for paper GOFA: A  generative one-for-all model for joint graph language modeling. The code is still under clean. Feel free to open an issue in Github if you encounter any problem. 
+ The source code for paper [GOFA: A  generative one-for-all model for joint graph language modeling](https://arxiv.org/abs/2407.09709). The code is still under clean. Feel free to open an issue in GitHub if you encounter any problem. 
 
 ## Installation Guide.
 First, clone the code repository and move to the code file. Then, create the python environment. We provide environment configuration:
@@ -68,5 +68,13 @@ trained model should be evaluated under inference model to obtain the correct ev
 We also provide checkpoint of mistral version of GOFA on arxiv instruction-tuning in [here](https://huggingface.co/WFRaain/GOFA/tree/main) with file name `nb_instruct.pth`. 
 You can use this checkpoint to directly reproduce the results in the paper. 
 
-
+## Citation
+```
+@article{kong2024gofa,
+  title={GOFA: A Generative One-For-All Model for Joint Graph Language Modeling},
+  author={Kong, Lecheng and Feng, Jiarui and Liu, Hao and Huang, Chengsong and Huang, Jiaxin and Chen, Yixin and Zhang, Muhan},
+  journal={arXiv preprint arXiv:2407.09709},
+  year={2024}
+}
+```
 
