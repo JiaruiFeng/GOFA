@@ -60,7 +60,7 @@ def main(params):
         ######################################################################################################
 
         train_task = GOFAPretrainTaskWrapper(["mag240m", "ultrachat200k", "wiki_graph", "wikikg90m"], root=params.data_root_path,
-                                            save_name=f"pretrain_{params.last_epochs}")
+                                            save_name=f"pretrain_{params.last_epochs}", fast_data_load=True)
 
         val_tasks = GOFAPretrainTaskWrapper(["arxiv", "ultrachat200k"], root=params.data_root_path,
                                             split="val", sample_size=100, save_name="pretrain_val",

@@ -102,7 +102,7 @@ class GOFATaskWrapper(DatasetWithCollate, ABC):
         return [values for _ in range(num_task)]
 
     @abstractmethod
-    def __get_task_list__(self, **kwargs):
+    def __get_task_list__(self):
         pass
 
 

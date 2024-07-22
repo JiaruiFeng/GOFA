@@ -5,7 +5,7 @@ if __name__ == "__main__":
     DATA_ROOT = "/storage1/yinjie.tang/Active/feng.jiarui/TAGDataset"
     SAMPLE_EPOCH = 1
     START_EPOCH = 0
-    SAMPLE_DATASETS = ["mag240m", "ultrachat200k", "wiki_graph", "wikikg90m"]
+    SAMPLE_DATASETS = ["wikikg90m"]
     MAG_PRETRAIN_TASK_LIST = ["CS", "CN", "SP"]
     WIKI_PRETRAIN_TASK_LIST = ["CN", "SP", "DS"]
     ULTRA_PRETRAIN_TASK_LIST = ["DS"]
@@ -15,6 +15,7 @@ if __name__ == "__main__":
     SPLIT = "all"
     ULTRA_SPLIT = "train"
     WIKIGRAPH_SPLIT = "train"
+    WIKI_SPLIT = "train"
     NUM_SP = 3
     NUM_CN = 3
     HOP = 3
@@ -51,6 +52,7 @@ if __name__ == "__main__":
             elif dataset == "wikikg90m":
                 sample_range = [WIKI_SAMPLE_RANGES[epoch]]
                 pretrain_tasks = WIKI_PRETRAIN_TASK_LIST
+                split = WIKI_SPLIT
             elif dataset == "ultrachat200k":
                 sample_range = [ULTRA_SAMPLE_RANGES[epoch]]
                 pretrain_tasks = ULTRA_PRETRAIN_TASK_LIST
