@@ -60,16 +60,18 @@ def main(params):
         ######################################################################################################
 
         train_task = GOFAPretrainTaskWrapper(["mag240m", "ultrachat200k", "wiki_graph", "wikikg90m"], root=params.data_root_path,
-                                            save_name=f"pretrain_{params.last_epochs}")
+                                            save_name=[f"pretrain_cuthalf_{params.last_epochs}", f"pretrain_{params.last_epochs}", f"pretrain_{params.last_epochs}", f"pretrain_{params.last_epochs}"])
+                                            # save_name=f"pretrain_{params.last_epochs}")
 
-        val_tasks = GOFAPretrainTaskWrapper(["arxiv", "ultrachat200k"], root=params.data_root_path,
-                                            split="val", sample_size=100, save_name="pretrain_val",
-                                            num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
+        # val_tasks = GOFAPretrainTaskWrapper(["ultrachat200k"], root=params.data_root_path,
+        #                                     split="val", sample_size=100, save_name="pretrain_val_lft",
+        #                                     num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3, left_keep_length=128)
 
-        test_tasks = GOFAPretrainTaskWrapper(["arxiv", "ultrachat200k"], root=params.data_root_path,
-                                            split="test", sample_size=100, save_name="pretrain_test",
-                                            num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
-
+        # test_tasks = GOFAPretrainTaskWrapper(["ultrachat200k"], root=params.data_root_path,
+        #                                     split="test", sample_size=100, save_name="pretrain_test_lft",
+        #                                     num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3, left_keep_length=128)
+        val_tasks = train_task
+        test_tasks = train_task
         n_steps = int(len(train_task) * params.num_epochs / (params.grad_acc_step * int(torch.cuda.device_count())))
 
         train_task = DataWithMeta(train_task, batch_size=params.batch_size, sample_size=params.train_sample_size)

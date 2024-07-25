@@ -127,6 +127,7 @@ class GOFA(torch.nn.Module):
         emb = g.x
         answer_texts = g.answer[g.answer_map.cpu().numpy()].tolist()
         prompt_texts = g.question[g.question_map.cpu().numpy()].tolist()
+        prompt_texts = ["" if p.startswith("Please complete the sentence of the node") else p for p in prompt_texts]
         emb = emb[g.question_index]
         answer_logits, answer_id, masks = self.llm_model.decode(answer_texts, emb, prompt=prompt_texts)
         GNNLMOutput = namedtuple("GNNLMOutput", ["logits", "answer_id", "pred_text", "answer"])
@@ -137,6 +138,7 @@ class GOFA(torch.nn.Module):
         emb = g.x
         answer_texts = g.answer[g.answer_map.cpu().numpy()].tolist()
         prompt_texts = g.question[g.question_map.cpu().numpy()].tolist()
+        prompt_texts = ["" if p.startswith("Please complete the sentence of the node") else p for p in prompt_texts]
         emb = emb[g.question_index]
         generated_text = self.llm_model.generate(emb, prompt=prompt_texts)
         for i, txt in enumerate(generated_text):
