@@ -54,21 +54,34 @@ def main(params):
     ggama_args.ggama_mlp_type = params.mlp_type
 
 
-    if params.run_mode == "pretrain":
+    if params.run_mode in ["pretrain", "pretrain_inf"]:
         ######################################################################################################
         #                                          Pretrain Task                                             #
         ######################################################################################################
 
-        train_task = GOFAPretrainTaskWrapper(["mag240m", "ultrachat200k", "wiki_graph", "wikikg90m"], root=params.data_root_path,
-                                            save_name=f"pretrain_{params.last_epochs}", fast_data_load=True)
+        # train_task = GOFAPretrainTaskWrapper(["mag240m", "ultrachat200k", "wiki_graph", "wikikg90m"], root=params.data_root_path,
+        #                                     save_name=[f"pretrain_cuthalf_only_cs_{params.last_epochs}",
+        #                                     f"pretrain_{params.last_epochs}", f"pretrain_{params.last_epochs}",
+        #                                                f"pretrain_only_cs_{params.last_epochs}"], fast_data_load=True)
+        #
+        #
+        # val_tasks = GOFAPretrainTaskWrapper(["arxiv", "ultrachat200k"], root=params.data_root_path,
+        #                                     split="val", sample_size=100, save_name=["pretrain_val_conly_cs", "pretrain_val"],
+        #                                     num_workers=params.num_workers, num_additional_sentences=3, pretrain_tasks=[["CS"],["DS"]])
+        #
+        # test_tasks = GOFAPretrainTaskWrapper(["arxiv", "ultrachat200k"], root=params.data_root_path,
+        #                                     split="test", sample_size=100, save_name=["pretrain_test_conly_cs", "pretrain_test"],
+        #                                     num_workers=params.num_workers, num_additional_sentences=3, pretrain_tasks=[["CS"],["DS"]])
 
-        val_tasks = GOFAPretrainTaskWrapper(["arxiv", "ultrachat200k"], root=params.data_root_path,
-                                            split="val", sample_size=100, save_name="pretrain_val",
-                                            num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
 
-        test_tasks = GOFAPretrainTaskWrapper(["arxiv", "ultrachat200k"], root=params.data_root_path,
-                                            split="test", sample_size=100, save_name="pretrain_test",
-                                            num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
+        train_task = GOFAPretrainTaskWrapper("arxiv", split="train", save_name="train_single_node", from_saved=False, root=params.data_root_path, sample_size=10, pretrain_tasks=["CS"],
+                                             num_additional_sentences=0, single_direction=True, add_prompt_graph=True, single_node_cs=False, left_keep_length=128)
+
+        val_tasks = GOFAPretrainTaskWrapper("arxiv", split="val", save_name="val_single_node", from_saved=False, root=params.data_root_path, sample_size=10, pretrain_tasks=["CS"],
+                                             num_additional_sentences=0, single_direction=True, add_prompt_graph=True, single_node_cs=False, left_keep_length=128)
+
+        test_tasks = GOFAPretrainTaskWrapper("arxiv", split="test", save_name="test_single_node", from_saved=False, root=params.data_root_path, sample_size=3000, pretrain_tasks=["CS"],
+                                             num_additional_sentences=0, single_direction=True, add_prompt_graph=True, single_node_cs=False, left_keep_length=128)
 
         n_steps = int(len(train_task) * params.num_epochs / (params.grad_acc_step * int(torch.cuda.device_count())))
 
@@ -227,9 +240,8 @@ def main(params):
 
     strategy = "deepspeed_stage_2" if torch.cuda.device_count() > 1 else "auto"
 
-    if params.run_mode == "inf":
-        val_res, test_res = lightning_test(wandb_logger, pred_model, params.datamodule, metrics, params.load_dir,
-                                           strategy=strategy)
+    if params.run_mode in ["inf", "pretrain_inf"]:
+        val_res, test_res = lightning_test(wandb_logger, pred_model, params.datamodule, metrics, strategy=strategy)
     else:
         val_res, test_res = lightning_fit(wandb_logger, pred_model, params.datamodule, metrics, params.num_epochs+params.last_epochs,
                                           strategy=strategy, save_model=params.save_model["save"], load_best=False,
