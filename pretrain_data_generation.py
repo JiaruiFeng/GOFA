@@ -3,24 +3,27 @@ import gc
 
 if __name__ == "__main__":
     DATA_ROOT = "/storage1/yinjie.tang/Active/feng.jiarui/TAGDataset"
+    SAVE_NAME_BASE = "pretrain_only_cs"
     SAMPLE_EPOCH = 1
-    START_EPOCH = 0
+    START_EPOCH = 1
     SAMPLE_DATASETS = ["wikikg90m"]
     MAG_PRETRAIN_TASK_LIST = ["CS", "CN", "SP"]
-    WIKI_PRETRAIN_TASK_LIST = ["CN", "SP", "DS"]
+    WIKI_PRETRAIN_TASK_LIST = ["DS"]
     ULTRA_PRETRAIN_TASK_LIST = ["DS"]
     WIKIGRAPH_PRETRAIN_TASK_LIST = ["CS"]
     ADDITIONAL_SENTENCES = 3
-    WIKIGRAPH_ADDITIONAL_SENTENCES = 4
+    WIKIGRAPH_ADDITIONAL_SENTENCES = 1
     SPLIT = "all"
     ULTRA_SPLIT = "train"
     WIKIGRAPH_SPLIT = "train"
     WIKI_SPLIT = "train"
+    WIKIGRAPH_LEFT_KEEP_LENGTH = 0
+    LEFT_KEEP_LENGTH = 64
     NUM_SP = 3
     NUM_CN = 3
     HOP = 3
     NUM_NODES_PER_HOP = 5
-    NUM_WORKERS = 64
+    NUM_WORKERS = 32
     MAG_SAMPLE_SIZE_PER_EPOCH = 300_000
     WIKI_SAMPLE_SIZE_PER_EPOCH = 50_000
     UlTRA_SAMPLE_SIZE_PER_EPOCH = 100_000
@@ -28,7 +31,6 @@ if __name__ == "__main__":
     INCLUDE_TARGETS = True
     WIKIGRAPH_INCLUDE_TARGETS = False
 
-    SAVE_NAME_BASE = "pretrain"
     MAG_SAMPLE_RANGES = [[i * MAG_SAMPLE_SIZE_PER_EPOCH + j for j in range(MAG_SAMPLE_SIZE_PER_EPOCH)]
                          for i in range(int(5_875_010/MAG_SAMPLE_SIZE_PER_EPOCH))]
     WIKI_SAMPLE_RANGES = [[i * WIKI_SAMPLE_SIZE_PER_EPOCH + j for j in range(WIKI_SAMPLE_SIZE_PER_EPOCH)]
@@ -43,6 +45,7 @@ if __name__ == "__main__":
         save_name = "_".join([SAVE_NAME_BASE, str(epoch)])
         num_additional_sentences = ADDITIONAL_SENTENCES
         include_targets = INCLUDE_TARGETS
+        left_keep_length = LEFT_KEEP_LENGTH
         split = SPLIT
 
         for dataset in SAMPLE_DATASETS:
@@ -61,6 +64,8 @@ if __name__ == "__main__":
                 sample_range = [WIKIGRAPH_SAMPLE_RANGES[epoch]]
                 pretrain_tasks = WIKIGRAPH_PRETRAIN_TASK_LIST
                 include_targets = WIKIGRAPH_INCLUDE_TARGETS
+                num_additional_sentences = WIKIGRAPH_ADDITIONAL_SENTENCES
+                left_keep_length = WIKIGRAPH_LEFT_KEEP_LENGTH
                 split = WIKIGRAPH_SPLIT
             else:
                 raise NotImplementedError
@@ -80,5 +85,6 @@ if __name__ == "__main__":
                                            num_SP=NUM_SP,
                                            num_CN=NUM_CN,
                                            include_targets=include_targets,
+                                           left_keep_length=LEFT_KEEP_LENGTH,
                                            )
             gc.collect()
