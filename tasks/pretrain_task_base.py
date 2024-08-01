@@ -121,8 +121,14 @@ class CompleteSentence(PretrainTaskBase):
 
     def cut_sentence(self, text_feature):
         words = text_feature.split(" ")
-        left_words = words[:self.left_keep_length]
-        right_words = words[self.left_keep_length:]
+        if len(words) <= 1:
+            return " ".join(words), ""
+        elif len(words) <= self.left_keep_length * 2:
+            left_keep_length = len(words) // 2
+        else:
+            left_keep_length = self.left_keep_length
+        left_words = words[:left_keep_length]
+        right_words = words[left_keep_length:]
         return " ".join(left_words), " ".join(right_words)
 
     def before_process(self, task_class, **kwargs):
