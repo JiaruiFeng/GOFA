@@ -78,7 +78,7 @@ def main(params):
                                              num_additional_sentences=0, single_direction=True, add_prompt_graph=True, single_node_cs=False, left_keep_length=128)
 
         val_tasks = GOFAPretrainTaskWrapper("arxiv", split="val", save_name="val_single_node", from_saved=False, root=params.data_root_path, sample_size=10, pretrain_tasks=["CS"],
-                                             num_additional_sentences=0, single_direction=True, add_prompt_graph=True, single_node_cs=False, left_keep_length=128)
+                                            num_additional_sentences=0, single_direction=True, add_prompt_graph=True, single_node_cs=False, left_keep_length=128)
 
         test_tasks = GOFAPretrainTaskWrapper("arxiv", split="test", save_name="test_single_node", from_saved=False, root=params.data_root_path, sample_size=3000, pretrain_tasks=["CS"],
                                              num_additional_sentences=0, single_direction=True, add_prompt_graph=True, single_node_cs=False, left_keep_length=128)
