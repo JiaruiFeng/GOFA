@@ -3,10 +3,10 @@ import gc
 
 if __name__ == "__main__":
     DATA_ROOT = "/storage1/yinjie.tang/Active/feng.jiarui/TAGDataset"
-    SAVE_NAME_BASE = "pretrain_only_cs"
-    SAMPLE_EPOCH = 1
-    START_EPOCH = 1
-    SAMPLE_DATASETS = ["wikikg90m"]
+    SAVE_NAME_BASE = "pretrain"
+    SAMPLE_EPOCH = 3
+    START_EPOCH = 0
+    SAMPLE_DATASETS = ["mag240m", "ultrachat200k"]
     MAG_PRETRAIN_TASK_LIST = ["CS", "CN", "SP"]
     WIKI_PRETRAIN_TASK_LIST = ["DS"]
     ULTRA_PRETRAIN_TASK_LIST = ["DS"]
@@ -18,12 +18,12 @@ if __name__ == "__main__":
     WIKIGRAPH_SPLIT = "train"
     WIKI_SPLIT = "train"
     WIKIGRAPH_LEFT_KEEP_LENGTH = 0
-    LEFT_KEEP_LENGTH = 64
+    LEFT_KEEP_LENGTH = 128
     NUM_SP = 3
     NUM_CN = 3
     HOP = 3
     NUM_NODES_PER_HOP = 5
-    NUM_WORKERS = 32
+    NUM_WORKERS = 64
     MAG_SAMPLE_SIZE_PER_EPOCH = 300_000
     WIKI_SAMPLE_SIZE_PER_EPOCH = 50_000
     UlTRA_SAMPLE_SIZE_PER_EPOCH = 100_000

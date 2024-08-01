@@ -74,7 +74,7 @@ def add_prompt_graph_to_data(
             data.edge_map = torch.cat([edge_map, prompt_edge_map + num_feature_edge_type], dim=-1)
         else:
             data.edge_map = torch.cat([edge_map, prompt_edge_map + edge_map.max()], dim=-1)
-        data.edge_attr = np.concatenate([data.edge_attr, prompt_edge_text[prompt_edge_map]], axis=-1)
+        data.edge_attr = np.concatenate([data.edge_attr, prompt_edge_text[prompt_edge_map.numpy()]], axis=-1)
 
     if prompt_edge_text is not None:
         data.x = np.concatenate([data.x, prompt_node_text])

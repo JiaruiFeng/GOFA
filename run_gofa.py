@@ -228,8 +228,7 @@ def main(params):
     strategy = "deepspeed_stage_2" if torch.cuda.device_count() > 1 else "auto"
 
     if params.run_mode == "inf":
-        val_res, test_res = lightning_test(wandb_logger, pred_model, params.datamodule, metrics, params.load_dir,
-                                           strategy=strategy)
+        val_res, test_res = lightning_test(wandb_logger, pred_model, params.datamodule, metrics, strategy=strategy)
     else:
         val_res, test_res = lightning_fit(wandb_logger, pred_model, params.datamodule, metrics, params.num_epochs+params.last_epochs,
                                           strategy=strategy, save_model=params.save_model["save"], load_best=False,

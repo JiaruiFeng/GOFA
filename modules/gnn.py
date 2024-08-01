@@ -31,7 +31,7 @@ class GOFAGNNConv(MessagePassing):
 
         self.add_self_loops = False
 
-        self.lin_qkv = Linear(self.in_dim, self.in_dim * 3, bias=False)
+        self.lin_qkv = Linear(self.in_dim, self.in_dim * 3, bias=True)
 
         self.e_proj = Linear(self.in_dim, self.in_dim * 2, bias=False)
         self.layer_norm_ek = LlamaRMSNorm(self.in_dim)
