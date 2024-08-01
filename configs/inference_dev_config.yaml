@@ -1,0 +1,41 @@
+run_mode: "pretrain_inf"
+num_epochs: 0
+offline_log: False
+mode: autoencoder
+load_dir: "/project/tantra/jerry.kong/repo/OFAv2/mistral_qamag03_best_ckpt.pth"
+base_llm: "mistral7b"
+load_model: True
+last_save: False
+batch_size: 1
+
+sample_size_per_task: 100
+llm_max_length: 1024
+train_data_multiples: 1.0
+train_task_names:
+  - cora_node
+hops: 3
+train_max_nodes_per_hops: 5
+ways: 40
+instructs: True
+selections: True
+
+
+eval_task_names:
+  - cora_node
+inf_sample_size_per_task: 1.0
+inf_hops:
+  - 3
+
+
+inf_max_nodes_per_hops:
+  - 10
+
+inf_ways:
+  - -1
+
+inf_instructs:
+  - True
+
+inf_selections:
+  - True
+

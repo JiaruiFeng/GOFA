@@ -115,7 +115,7 @@ def lightning_test(
     model,
     data_module,
     metrics: EvalKit,
-    model_dir: str,
+    model_dir: str = None,
     strategy="auto",
     profiler=None,
     prog_freq=20,
@@ -137,11 +137,12 @@ def lightning_test(
         enable_progress_bar=prog_bar,
         detect_anomaly=detect_anomaly,
     )
-    deep_speed = False
-    if strategy[:9] == "deepspeed":
-        deep_speed = True
-    state_dict = load_pretrained_state(model_dir, deep_speed)
-    model.load_state_dict(state_dict)
+    if model_dir:
+        deep_speed = False
+        if strategy[:9] == "deepspeed":
+            deep_speed = True
+        state_dict = load_pretrained_state(model_dir, deep_speed)
+        model.load_state_dict(state_dict)
 
 
     val_col = []

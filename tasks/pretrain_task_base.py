@@ -125,10 +125,12 @@ class CompleteSentence(PretrainTaskBase):
             return " ".join(words), ""
         elif len(words) <= self.left_keep_length * 2:
             left_keep_length = len(words) // 2
+            right_keep_length = len(words)
         else:
             left_keep_length = self.left_keep_length
+            right_keep_length = left_keep_length * 2
         left_words = words[:left_keep_length]
-        right_words = words[left_keep_length:]
+        right_words = words[left_keep_length:right_keep_length]
         return " ".join(left_words), " ".join(right_words)
 
     def before_process(self, task_class, **kwargs):

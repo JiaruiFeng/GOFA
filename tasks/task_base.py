@@ -74,11 +74,30 @@ def add_prompt_graph_to_data(
             data.edge_map = torch.cat([edge_map, prompt_edge_map + num_feature_edge_type], dim=-1)
         else:
             data.edge_map = torch.cat([edge_map, prompt_edge_map + edge_map.max()], dim=-1)
-        data.edge_attr = np.concatenate([data.edge_attr, prompt_edge_text[prompt_edge_map]], axis=-1)
+        data.edge_attr = np.concatenate([data.edge_attr, prompt_edge_text[prompt_edge_map.numpy()]], axis=-1)
 
     if prompt_edge_text is not None:
         data.x = np.concatenate([data.x, prompt_node_text])
 
+    return data
+
+def single_node_graph_complete_sentence(data, **kwargs):
+    """Only work if the input data are complete sentence task with no additional sentence
+    """
+    target_index = data.target_index[0]
+    data.x = data.x[target_index]
+    data.node_map = torch.tensor([0], dtype=torch.long)
+    data.edge_index = torch.tensor([[], []], dtype=torch.long)
+    data.edge_map = torch.tensor([], dtype=torch.long)
+    data.edge_attr = np.array([], dtype=object)
+    #data.question = np.array(["Please complete the sentence of the target node."], dtype=object)
+    data.question[0] = data.question[0].replace(f"[NODE_INDEX {target_index[0]}]", f"[NODE_INDEX 0]")
+    data.question_map = torch.tensor([0], dtype=torch.long)
+    data.answer = data.answer[[0]]
+    data.answer_map = torch.tensor([0], dtype=torch.long)
+    data.label = data.label[[0]]
+    data.label_map = torch.tensor([0], dtype=torch.long)
+    data.target_index = [[0]]
     return data
 
 

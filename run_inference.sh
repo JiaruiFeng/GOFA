@@ -1,1 +1,1 @@
-python run_gofa.py --override ./configs/inference_config.yaml
+python run_gofa.py --override ./configs/inference_dev_config.yaml
