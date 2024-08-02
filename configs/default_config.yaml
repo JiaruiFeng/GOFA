@@ -1,4 +1,4 @@
-root_path: ""
+root_path:
 data_root_path: "./TAGDataset"
 num_bases: 4
 emb_dim: 1024

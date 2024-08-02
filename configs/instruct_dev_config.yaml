@@ -1,6 +1,7 @@
 run_mode: "ft"
 load_model: True
-load_dir: "/project/tantra/jerry.kong/repo/OFAv2/qamag03_best_ckpt.pth"
+load_dir: "/storage1/christopherking/Active/jerry.kong/saved_exp/2024-07-24 23:21:50.320791_779/mem_ckpt.pth"
+grad_acc_step: 64
 last_epochs: 0
 num_epochs: 1
 mode: autoencoder
@@ -13,13 +14,13 @@ llm_max_length: 256
 train_task_names:
   - arxiv
 sample_size_per_task:
-  - 100
+  - 80000
 hops:
   - 3
 
 train_max_nodes_per_hops:
   - 5
-ways: 5
+ways: 10
 instructs: True
 
 eval_task_names:
@@ -30,7 +31,7 @@ eval_task_names:
   - expla_graph
   - fb15k237
   - scene_graph
-inf_sample_size_per_task: 20
+inf_sample_size_per_task: 500
 inf_hops:
   - 3
   - 3
