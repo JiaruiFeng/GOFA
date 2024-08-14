@@ -2,7 +2,7 @@ from tasks import GOFAPretrainTaskWrapper
 import gc
 
 if __name__ == "__main__":
-    DATA_ROOT = "/storage1/yinjie.tang/Active/feng.jiarui/TAGDataset"
+    DATA_ROOT = "../TAGDataset"
     SAVE_NAME_BASE = "pretrain"
     SAMPLE_EPOCH = 1
     START_EPOCH = 2
