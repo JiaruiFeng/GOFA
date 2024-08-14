@@ -6,7 +6,7 @@ if __name__ == "__main__":
     SAVE_NAME_BASE = "pretrain"
     SAMPLE_EPOCH = 1
     START_EPOCH = 2
-    SAMPLE_DATASETS = ["mag240m"]
+    SAMPLE_DATASETS = ["wikikg90m"]
     MAG_PRETRAIN_TASK_LIST = ["CS", "CN", "SP"]
     WIKI_PRETRAIN_TASK_LIST = ["DS"]
     ULTRA_PRETRAIN_TASK_LIST = ["DS"]
