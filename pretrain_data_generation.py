@@ -2,20 +2,23 @@ from tasks import GOFAPretrainTaskWrapper
 import gc
 
 if __name__ == "__main__":
-    DATA_ROOT = "/storage1/yinjie.tang/Active/feng.jiarui/TAGDataset"
+    DATA_ROOT = "../TAGDataset"
+    SAVE_NAME_BASE = "pretrain"
     SAMPLE_EPOCH = 1
-    START_EPOCH = 0
+    START_EPOCH = 2
     SAMPLE_DATASETS = ["wikikg90m"]
     MAG_PRETRAIN_TASK_LIST = ["CS", "CN", "SP"]
-    WIKI_PRETRAIN_TASK_LIST = ["CN", "SP", "DS"]
+    WIKI_PRETRAIN_TASK_LIST = ["DS"]
     ULTRA_PRETRAIN_TASK_LIST = ["DS"]
     WIKIGRAPH_PRETRAIN_TASK_LIST = ["CS"]
     ADDITIONAL_SENTENCES = 3
-    WIKIGRAPH_ADDITIONAL_SENTENCES = 4
+    WIKIGRAPH_ADDITIONAL_SENTENCES = 1
     SPLIT = "all"
     ULTRA_SPLIT = "train"
     WIKIGRAPH_SPLIT = "train"
     WIKI_SPLIT = "train"
+    WIKIGRAPH_LEFT_KEEP_LENGTH = 0
+    LEFT_KEEP_LENGTH = 128
     NUM_SP = 3
     NUM_CN = 3
     HOP = 3
@@ -28,21 +31,20 @@ if __name__ == "__main__":
     INCLUDE_TARGETS = True
     WIKIGRAPH_INCLUDE_TARGETS = False
 
-    SAVE_NAME_BASE = "pretrain"
-    MAG_SAMPLE_RANGES = [[i * MAG_SAMPLE_SIZE_PER_EPOCH + j for j in range(MAG_SAMPLE_SIZE_PER_EPOCH)]
-                         for i in range(int(5_875_010/MAG_SAMPLE_SIZE_PER_EPOCH))]
-    WIKI_SAMPLE_RANGES = [[i * WIKI_SAMPLE_SIZE_PER_EPOCH + j for j in range(WIKI_SAMPLE_SIZE_PER_EPOCH)]
-                         for i in range(int(5_000_000/WIKI_SAMPLE_SIZE_PER_EPOCH))]
-    ULTRA_SAMPLE_RANGES = [[i * UlTRA_SAMPLE_SIZE_PER_EPOCH + j for j in range(UlTRA_SAMPLE_SIZE_PER_EPOCH)]
-                         for i in range(int(314950/UlTRA_SAMPLE_SIZE_PER_EPOCH))] ##44993 89986
-    WIKIGRAPH_SAMPLE_RANGES = [[i * WIKIGRAPH_SAMPLE_SIZE_PER_EPOCH + j for j in range(WIKIGRAPH_SAMPLE_SIZE_PER_EPOCH)]
-                         for i in range(int(200_000/WIKIGRAPH_SAMPLE_SIZE_PER_EPOCH))]
+    MAG_SAMPLE_RANGES = [[i * MAG_SAMPLE_SIZE_PER_EPOCH + j for j in range(min(MAG_SAMPLE_SIZE_PER_EPOCH, 5_875_010 - i * MAG_SAMPLE_SIZE_PER_EPOCH))]
+                         for i in range(int(5_875_010/MAG_SAMPLE_SIZE_PER_EPOCH) + 1)]
+    WIKI_SAMPLE_RANGES = [[i * WIKI_SAMPLE_SIZE_PER_EPOCH + j for j in range(min(WIKI_SAMPLE_SIZE_PER_EPOCH, 5_000_000 - i * WIKI_SAMPLE_SIZE_PER_EPOCH))] for i in range(int(5_000_000/WIKI_SAMPLE_SIZE_PER_EPOCH) + 1)]
+    ULTRA_SAMPLE_RANGES = [[i * UlTRA_SAMPLE_SIZE_PER_EPOCH + j for j in range(min(UlTRA_SAMPLE_SIZE_PER_EPOCH, 314950 - i * UlTRA_SAMPLE_SIZE_PER_EPOCH))]
+                         for i in range(int(314950/UlTRA_SAMPLE_SIZE_PER_EPOCH) + 1)] ##44993 89986
+    WIKIGRAPH_SAMPLE_RANGES = [[i * WIKIGRAPH_SAMPLE_SIZE_PER_EPOCH + j for j in range(min(WIKIGRAPH_SAMPLE_SIZE_PER_EPOCH,
+        129_864 - i * WIKIGRAPH_SAMPLE_SIZE_PER_EPOCH))] for i in range(int(129_864/WIKIGRAPH_SAMPLE_SIZE_PER_EPOCH) + 1)]
 
 
     for epoch in range(START_EPOCH, START_EPOCH + SAMPLE_EPOCH):
         save_name = "_".join([SAVE_NAME_BASE, str(epoch)])
         num_additional_sentences = ADDITIONAL_SENTENCES
         include_targets = INCLUDE_TARGETS
+        left_keep_length = LEFT_KEEP_LENGTH
         split = SPLIT
 
         for dataset in SAMPLE_DATASETS:
@@ -61,6 +63,8 @@ if __name__ == "__main__":
                 sample_range = [WIKIGRAPH_SAMPLE_RANGES[epoch]]
                 pretrain_tasks = WIKIGRAPH_PRETRAIN_TASK_LIST
                 include_targets = WIKIGRAPH_INCLUDE_TARGETS
+                num_additional_sentences = WIKIGRAPH_ADDITIONAL_SENTENCES
+                left_keep_length = WIKIGRAPH_LEFT_KEEP_LENGTH
                 split = WIKIGRAPH_SPLIT
             else:
                 raise NotImplementedError
@@ -80,5 +84,6 @@ if __name__ == "__main__":
                                            num_SP=NUM_SP,
                                            num_CN=NUM_CN,
                                            include_targets=include_targets,
+                                           left_keep_length=left_keep_length,
                                            )
             gc.collect()

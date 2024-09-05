@@ -18,6 +18,7 @@ from .task_base import build_GOFA_task_graph
 from functools import partial
 from .pretrain_datasets import get_pretrain_dataset
 from .pretrain_tasks import GOFAGraphPretrainTask, GOFALinkPretrainTask, GOFANodePretrainTask
+from .pretrain_task_base import single_node_graph_complete_sentence
 
 class GOFATaskWrapper(DatasetWithCollate, ABC):
     r"""GOFA task wrapper base class. Use to wrap multiple tasks together.
@@ -209,6 +210,11 @@ class GOFAPretrainTaskWrapper(GOFATaskWrapper):
         single_direction = False
         if "single_direction" in kwargs:
             single_direction = kwargs["single_direction"]
+        single_node_cs = False
+        if "single_node_cs" in kwargs:
+            single_node_cs = kwargs["single_node_cs"]
+        if single_node_cs:
+            post_funcs.append(single_node_graph_complete_sentence)
 
         post_funcs = post_funcs + [partial(build_GOFA_task_graph, is_pretrain=True, add_prompt_graph=add_prompt_graph,
                                            single_direction=single_direction)]

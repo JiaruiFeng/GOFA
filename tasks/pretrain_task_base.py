@@ -379,3 +379,22 @@ class CommonNeighbors(PretrainTaskBase):
         task_class.answer_features = np.array(new_answer_list, dtype=object)
         return
 
+
+def single_node_graph_complete_sentence(data, **kwargs):
+    """Only work if the input data are complete sentence task with no additional sentence
+    """
+    target_index = data.target_index[0]
+    data.x = data.x[target_index]
+    data.node_map = torch.tensor([0], dtype=torch.long)
+    data.edge_index = torch.tensor([[], []], dtype=torch.long)
+    data.edge_map = torch.tensor([], dtype=torch.long)
+    data.edge_attr = np.array([], dtype=object)
+    #data.question = np.array(["Please complete the sentence of the target node."], dtype=object)
+    data.question[0] = data.question[0].replace(f"[NODE_INDEX {target_index[0]}]", f"[NODE_INDEX 0]")
+    data.question_map = torch.tensor([0], dtype=torch.long)
+    data.answer = data.answer[[0]]
+    data.answer_map = torch.tensor([0], dtype=torch.long)
+    data.label = data.label[[0]]
+    data.label_map = torch.tensor([0], dtype=torch.long)
+    data.target_index = [[0]]
+    return data
