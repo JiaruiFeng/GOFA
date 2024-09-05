@@ -12,7 +12,7 @@ from gp.lightning.metric import (EvalKit, )
 from gp.lightning.data_template import DataModule
 from gp.lightning.training import lightning_fit, lightning_test
 from gp.lightning.module_template import ExpConfig
-from lightning_model import GraphPredLightning
+from lightning_model import GraphPredLightning, GraphTextPredLightning
 from gofa_models.model import GOFA
 from gofa_models.config import GOFALlamaConfig, GOFAMistralConfig
 
@@ -58,12 +58,14 @@ def main(params):
         #                                          Pretrain Task                                             #
         ######################################################################################################
 
-        train_task = GOFAPretrainTaskWrapper(["mag240m"], root=params.data_root_path,
-                                            split="all", save_suffixs=["plain_text_1"], add_prompt_graph=False)
+        train_task = GOFAPretrainTaskWrapper(["arxiv"], root=params.data_root_path,
+                                            split="train", save_suffixs=["llm_arxiv_train"], add_prompt_graph=False, left_keep_length=128)
         val_tasks = GOFAPretrainTaskWrapper(["arxiv"], root=params.data_root_path,
-                                          split="val", num_workers=params.num_workers, add_prompt_graph=False)
+                                          split="val", num_workers=params.num_workers, add_prompt_graph=False, left_keep_length=128)
         test_tasks = GOFAPretrainTaskWrapper(["arxiv"], root=params.data_root_path,
-                                          split="test", num_workers=params.num_workers, add_prompt_graph=False)
+                                          split="test", num_workers=params.num_workers, add_prompt_graph=False, left_keep_length=128)
+
+        # breakpoint()
 
         n_steps = int(len(train_task) * params.num_epochs / (params.grad_acc_step * int(torch.cuda.device_count())))
 
@@ -209,7 +211,7 @@ def main(params):
     exp_config = ExpConfig("", optimizer, lr_scheduler=lr_scheduler_config)
     exp_config.val_state_name = val_state
     exp_config.test_state_name = test_state
-    pred_model = GraphPredLightning(exp_config, model, metrics)
+    pred_model = GraphTextPredLightning(exp_config, model, metrics)
     if params.load_model:
         print("-"*60+"LOADING"+"-"*60)
         if os.path.isdir(params.load_dir):

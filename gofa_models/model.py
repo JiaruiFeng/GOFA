@@ -67,6 +67,9 @@ class GOFA(torch.nn.Module):
         elif mode == "nograph":
             self.encode = self.llm_decode
             self.decode = lambda x: x
+        elif mode == "nographft":
+            self.encode = self.llm_ft
+            self.decode = lambda x: x
         elif mode == "nographgen":
             self.encode = self.llm_gen
             self.decode = lambda x: x
@@ -79,6 +82,26 @@ class GOFA(torch.nn.Module):
         com_text_inputs = []
         for i in range(len(text_inputs)):
             t = text_inputs[i] + g.question[i]
+            com_text_inputs.append(t)
+        answer_texts = g.answer[g.answer_map.cpu().numpy()].tolist()
+
+        answer_logits, answer_id, masks = self.llm_model(answer_texts, com_text_inputs)
+        GNNLMOutput = namedtuple("GNNLMOutput", ["logits", "answer_id", "pred_text", "answer"])
+        return GNNLMOutput(logits=answer_logits[masks], pred_text=self.logit_to_text(answer_logits, masks),
+                           answer_id=answer_id, answer=answer_texts)
+
+    def llm_ft(self, g):
+        text_inputs = g.x[g.node_map.cpu().numpy()][g.question_index.cpu().numpy()].tolist()
+        all_x = g.x[g.node_map.cpu().numpy()].tolist()
+        truncated_x = [t[:80] for t in all_x[1:]]
+        all_x = ' '.join(all_x[:1] + truncated_x)
+        com_text_inputs = []
+        for i in range(len(text_inputs)):
+            # add edge text description
+            edge_t = g.node_ids[i][g.edge_index.cpu()[:,:-2]]
+            edge_t = ', '.join(edge_t[0] + ' connects to ' + edge_t[1])
+            t = all_x + '. ' + edge_t + '. ' + g.question[i]
+            # t = text_inputs[i] + g.question[i]
             com_text_inputs.append(t)
         answer_texts = g.answer[g.answer_map.cpu().numpy()].tolist()
 

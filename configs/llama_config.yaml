@@ -16,7 +16,7 @@ eval_batch_size: 1
 num_workers: 4
 seed: 1
 data_path:
-offline_log: True
+offline_log: False
 test_rep: 1
 log_project: "ggama"
 exp_name: "ggama"
@@ -26,8 +26,8 @@ rwpe:
 task_names:
   - arxiv
 llm_name: "icae"
-base_llm: "llama7blora"
-llm_max_length: 128
+base_llm: "mistral7blora"
+llm_max_length: 2048
 llm_b_size: 1
 val_interval: 1
 load_texts: True
@@ -59,32 +59,68 @@ selections: True
 train_task_names:
   - arxiv
 sample_size_per_task:
-  - 20000
+  - -1
 hops:
   - 3
 
 train_max_nodes_per_hops:
   - 10
 ways: 5
-save_suffix: "instruct_ft_scheck"
-instructs: True
+save_suffix: "llm_instruct_ft"
+instructs: False
 
 
 eval_task_names:
   - cora_node
-
+  - pubmed_node
+  - wikics
+  - products
+  - expla_graph
+  - fb15k237
+  - scene_graph
+inf_sample_size_per_task: 1.0
 inf_hops:
   - 3
+  - 3
+  - 3
+  - 3
+  - -1
+  - 3
+  - -1
 
 inf_max_nodes_per_hops:
   - 10
+  - 10
+  - 10
+  - 10
+  - -1
+  - 10
+  - -1
 
 inf_ways:
   - 7
+  - 3
+  - 10
+  - 10
+  - 2
+  - 10
+  - -1
 
 inf_instructs:
-  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
 
 inf_selections:
-  - True
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
+  - False
 
