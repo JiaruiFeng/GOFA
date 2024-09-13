@@ -58,8 +58,10 @@ def main(params):
         #                                          Pretrain Task                                             #
         ######################################################################################################
 
-        train_task = GOFAPretrainTaskWrapper(["arxiv"], root=params.data_root_path,
-                                            split="train", save_suffixs=["llm_arxiv_train"], add_prompt_graph=False, left_keep_length=128)
+        train_task = GOFAPretrainTaskWrapper(["mag240m", "ultrachat200k", "wiki_graph", "wikikg90m"],
+                                             root=params.data_root_path, save_name=f"pretrain_{params.last_epochs}", fast_data_load=True, single_node_cs=True)
+        # train_task = GOFAPretrainTaskWrapper(["arxiv"], root=params.data_root_path,
+        #                                     split="train", save_suffixs=["llm_arxiv_train"], add_prompt_graph=False, left_keep_length=128)
         val_tasks = GOFAPretrainTaskWrapper(["arxiv"], root=params.data_root_path,
                                           split="val", num_workers=params.num_workers, add_prompt_graph=False, left_keep_length=128)
         test_tasks = GOFAPretrainTaskWrapper(["arxiv"], root=params.data_root_path,
@@ -116,7 +118,8 @@ def main(params):
                                             num_workers=params.num_workers,
                                             instruction=params.instructs,
                                             selection=params.selections,
-                                            add_prompt_graph=False)
+                                            add_prompt_graph=False,
+                                            save_data=True)
 
         n_steps = int(len(train_task) * params.num_epochs / (params.grad_acc_step * int(torch.cuda.device_count())))
 
