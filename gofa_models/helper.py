@@ -14,7 +14,7 @@ class GOFALlamaHelper(torch.nn.Module):
         model_args, training_args, gofa_args = transformer_args
         model = LlamaICAE(model_args, training_args, gofa_args)  # restored llama2-7b-chat model
         state_dict = torch.load(
-            "../OFAv2/cache_data/model/llama-2-7b-chat-finetuned-icae_zeroweight_llama2.pt")  # change the path for your model
+            "../cache_data/cache_data/model/llama-2-7b-chat-finetuned-icae_zeroweight_llama2.pt")  # change the path for your model
         new_state_dict = OrderedDict()
 
         for layer_name, weight in state_dict.items():
@@ -274,7 +274,7 @@ class GOFAMistralHelper(torch.nn.Module):
         super().__init__()
         model_args, training_args, gofa_args = transformer_args
         model = MistralICAE(model_args, training_args, gofa_args)  # restored llama2-7b-chat model
-        state_dict = load_file("/project/tantra/liuhao/OFAv2/cache_data/model/mistral_7b_ft_icae.safetensors")  # change the path for your model
+        state_dict = load_file("./cache_data/model/mistral_7b_ft_icae.safetensors")  # change the path for your model
         new_state_dict = OrderedDict()
         for layer_name, weight in state_dict.items():
             new_state_dict[layer_name.replace("default", "encadapt")] = weight
