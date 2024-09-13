@@ -44,14 +44,16 @@ def main(params):
     checkpoint_dir = os.path.join(params.exp_dir, params.log_project)
     params_dict = vars(params)
     wandb_logger.log_table(key="hparams", columns=list(params_dict.keys()), data=[list(params_dict.values())])
-    model_args, training_args, ggama_args = ModelArguments(), TrainingArguments(), gofa_config(
+    model_args, training_args, gofa_args = ModelArguments(), TrainingArguments(), gofa_config(
         num_layers=params.num_layers)
     model_args.dec_lora = params.dec_lora
+    model_args.llama_pretrain_checkpoint = params.llama_pretrain_checkpoint
+    model_args.mistral_pretrain_checkpoint = params.mistral_pretrain_checkpoint
     training_args.model_max_length = params.llm_max_length
     if params.training_precision == "bf16-mixed":
         training_args.bf16 = True
-        ggama_args.llama_dtype = torch.bfloat16
-    ggama_args.ggama_mlp_type = params.mlp_type
+        gofa_args.llama_dtype = torch.bfloat16
+    gofa_args.gnn_mlp_type = params.mlp_type
 
 
     if params.run_mode == "pretrain":
@@ -170,7 +172,7 @@ def main(params):
     text_dataset = {"train": train_task, "val": val_tasks, "test": test_tasks}
     params.datamodule = DataModule(text_dataset, num_workers=params.num_workers)
 
-    model = GOFA(transformer_args=[model_args, training_args, ggama_args], mode=params.mode, base_llm=params.base_llm, save_dir=params.exp_dir)
+    model = GOFA(transformer_args=[model_args, training_args, gofa_args], mode=params.mode, base_llm=params.base_llm, save_dir=params.exp_dir)
     train_params = list(model.llm_model.model.icae.get_base_model().model.g_layers.parameters())
     if model_args.dec_lora:
         for name, param in model.llm_model.model.icae.named_parameters():
