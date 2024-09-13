@@ -293,9 +293,9 @@ class GOFAFineTuneTaskWrapper(GOFATaskWrapper):
             hop: Union[int, list[int]] = 3,
             max_nodes_per_hop: Union[int, list[int]] = 5,
             num_workers: Union[list[int], int] = 0,
-            selection: Optional[list[bool], bool] = True,
-            way: Optional[list[int], int] = -1,
-            instruction: Optional[list[bool], bool] = True,
+            selection: Optional[Union[list[bool], bool]] = True,
+            way: Optional[Union[list[int], int]] = -1,
+            instruction: Optional[Union[list[bool], bool]] = True,
             **kwargs):
         if isinstance(task_names, str):
             task_names = [task_names]
