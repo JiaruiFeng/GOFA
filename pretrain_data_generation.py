@@ -1,89 +1,269 @@
+import torch
+
 from tasks import GOFAPretrainTaskWrapper
 import gc
+import random
+import numpy as np
+
+DATA_ROOT = "/storage1/yinjie.tang/Active/feng.jiarui/TAGDataset"
+SAVE_NAME_BASE = "pretrain"
+CS_MAX_LEFT_KEEP_LENGTH = 128
+
+def generate_default_task(dataset, split, sample_range, node_task_save_name, num_workers, hop, num_nodes_per_hop,
+                          node_task_list, additional_sentences,num_SP, num_CN, include_targets,
+                          key_to_content_sample_range, key_to_content_task_save_name, content_to_key_sample_range,
+                          content_to_key_task_save_name, num_LP=1):
+
+    node_task = GOFAPretrainTaskWrapper(task_names=dataset,
+                                        root=DATA_ROOT,
+                                        split=split,
+                                        sample_size=sample_range,
+                                        save_name=node_task_save_name,
+                                        save_data=True,
+                                        from_saved=False,
+                                        num_workers=num_workers,
+                                        hop=hop,
+                                        max_nodes_per_hop=num_nodes_per_hop,
+                                        pretrain_tasks=node_task_list,
+                                        num_additional_sentences=additional_sentences,
+                                        num_SP=num_SP,
+                                        num_CN=num_CN,
+                                        include_targets=include_targets,
+                                        left_keep_length=CS_MAX_LEFT_KEEP_LENGTH,
+                                        num_LP=num_LP,
+                                        )
+    del node_task
+    gc.collect()
+    key_to_content_task = GOFAPretrainTaskWrapper(task_names=dataset,
+                                                  root=DATA_ROOT,
+                                                  split=split,
+                                                  sample_size=key_to_content_sample_range,
+                                                  save_name=key_to_content_task_save_name,
+                                                  save_data=True,
+                                                  from_saved=False,
+                                                  num_workers=num_workers,
+                                                  hop=hop,
+                                                  max_nodes_per_hop=num_nodes_per_hop,
+                                                  pretrain_tasks=["IR"]
+                                                 )
+    del key_to_content_task
+    gc.collect()
+    content_to_key_task = GOFAPretrainTaskWrapper(task_names=dataset,
+                                                  root=DATA_ROOT,
+                                                  split=split,
+                                                  sample_size=content_to_key_sample_range,
+                                                  save_name=content_to_key_task_save_name,
+                                                  save_data=True,
+                                                  from_saved=False,
+                                                  num_workers=num_workers,
+                                                  hop=hop,
+                                                  max_nodes_per_hop=num_nodes_per_hop,
+                                                  pretrain_tasks=["IR"],
+                                                  content_to_key=True
+                                                  )
+    del content_to_key_task
+    gc.collect()
+
+def generate_mag240m(epoch):
+    dataset = "mag240m"
+    node_task_list = ["CS", "CN", "SP"]
+    node_task_sample_size_per_epoch = 500_000
+    IR_task_sample_size_per_epoch = 10_000
+    sample_range = [[epoch * node_task_sample_size_per_epoch + i for i in range(node_task_sample_size_per_epoch)]]
+    key_to_content_sample_range = [[4_500_000 + epoch * IR_task_sample_size_per_epoch + i for i in range(IR_task_sample_size_per_epoch)]]
+    content_to_key_sample_range = [[5_000_000 + epoch * IR_task_sample_size_per_epoch + i for i in range(IR_task_sample_size_per_epoch)]]
+    additional_sentences = 3
+    include_targets = True
+    num_SP = 3
+    num_CN = 3
+    hop = 3
+    num_nodes_per_hop = 5
+    num_workers = 32
+    split = "all"
+    node_task_save_name = "_".join([SAVE_NAME_BASE, str(epoch)])
+    key_to_content_task_save_name = "_".join([SAVE_NAME_BASE, "IR_kc", str(epoch)])
+    content_to_key_task_save_name = "_".join([SAVE_NAME_BASE, "IR_ck", str(epoch)])
+    generate_default_task(dataset, split, sample_range, node_task_save_name, num_workers, hop, num_nodes_per_hop,
+                          node_task_list, additional_sentences,num_SP, num_CN, include_targets,
+                          key_to_content_sample_range, key_to_content_task_save_name, content_to_key_sample_range,
+                          content_to_key_task_save_name)
+
+def generate_arxiv(epoch):
+    dataset = "arxiv"
+    node_task_list = ["CS", "CN", "SP"]
+    node_task_sample_size_per_epoch = 50_000
+    IR_task_sample_size_per_epoch = 10_000
+    sample_range = [[epoch * node_task_sample_size_per_epoch + i for i in range(node_task_sample_size_per_epoch)]]
+
+    key_to_content_sample_range = [i for i in range(169_343)]
+    for _ in range(epoch + 1):
+        random.shuffle(key_to_content_sample_range)
+    key_to_content_sample_range = [key_to_content_sample_range[:IR_task_sample_size_per_epoch]]
+
+    content_to_key_sample_range = [i for i in range(169_343)]
+    for _ in range(epoch + 1):
+        random.shuffle(content_to_key_sample_range)
+    content_to_key_sample_range = [content_to_key_sample_range[:IR_task_sample_size_per_epoch]]
+
+    additional_sentences = 3
+    include_targets = True
+    num_SP = 3
+    num_CN = 3
+    hop = 3
+    num_nodes_per_hop = 5
+    num_workers = 32
+    split = "all"
+    node_task_save_name = "_".join([SAVE_NAME_BASE, str(epoch)])
+    key_to_content_task_save_name = "_".join([SAVE_NAME_BASE, "IR_kc", str(epoch)])
+    content_to_key_task_save_name = "_".join([SAVE_NAME_BASE, "IR_ck", str(epoch)])
+    generate_default_task(dataset, split, sample_range, node_task_save_name, num_workers, hop, num_nodes_per_hop,
+                          node_task_list, additional_sentences, num_SP, num_CN, include_targets,
+                          key_to_content_sample_range, key_to_content_task_save_name, content_to_key_sample_range,
+                          content_to_key_task_save_name)
+
+def generate_pubmed_node(epoch):
+    dataset = "pubmed_node"
+    node_task_list = ["CS", "CN", "SP"]
+    node_task_sample_size_per_epoch = 5_000
+    IR_task_sample_size_per_epoch = 5_000
+    sample_range = [[epoch * node_task_sample_size_per_epoch + i for i in range(node_task_sample_size_per_epoch)]]
+    key_to_content_sample_range = [i for i in range(19_717)]
+    for _ in range(epoch + 1):
+        random.shuffle(key_to_content_sample_range)
+    key_to_content_sample_range = [key_to_content_sample_range[:IR_task_sample_size_per_epoch]]
+
+    content_to_key_sample_range = [i for i in range(19_717)]
+    for _ in range(epoch + 1):
+        random.shuffle(content_to_key_sample_range)
+    content_to_key_sample_range = [content_to_key_sample_range[:IR_task_sample_size_per_epoch]]
+    additional_sentences = 3
+    include_targets = True
+    num_SP = 3
+    num_CN = 3
+    hop = 3
+    num_nodes_per_hop = 5
+    num_workers = 32
+    split = "all"
+    node_task_save_name = "_".join([SAVE_NAME_BASE, str(epoch)])
+    key_to_content_task_save_name = "_".join([SAVE_NAME_BASE, "IR_kc", str(epoch)])
+    content_to_key_task_save_name = "_".join([SAVE_NAME_BASE, "IR_ck", str(epoch)])
+    generate_default_task(dataset, split, sample_range, node_task_save_name, num_workers, hop, num_nodes_per_hop,
+                          node_task_list, additional_sentences, num_SP, num_CN, include_targets,
+                          key_to_content_sample_range, key_to_content_task_save_name, content_to_key_sample_range,
+                          content_to_key_task_save_name)
+
+
+def generate_ultrachat200k(epoch):
+    dataset = "ultrachat200k"
+    task_list = ["DS"]
+    task_sample_size_per_epoch = 100_000
+    sample_range = [[epoch * task_sample_size_per_epoch + i for i in range(task_sample_size_per_epoch)]]
+    split = "all"
+    num_workers = 32
+    task_save_name = "_".join([SAVE_NAME_BASE, str(epoch)])
+    task = GOFAPretrainTaskWrapper(task_names=dataset,
+                                        root=DATA_ROOT,
+                                        split=split,
+                                        sample_size=sample_range,
+                                        save_name=task_save_name,
+                                        save_data=True,
+                                        from_saved=False,
+                                        num_workers=num_workers,
+                                        pretrain_tasks=task_list,
+                                        )
+    del task
+    gc.collect()
+
+def generate_wiki_graph(epoch):
+    dataset = "wiki_graph"
+    node_task_list = ["CS", "CN", "SP"]
+    node_task_sample_size_per_epoch = 80_000
+    IR_task_sample_size_per_epoch = 10_000
+    sample_range = [[epoch * node_task_sample_size_per_epoch + i for i in range(node_task_sample_size_per_epoch)]]
+
+    key_to_content_sample_range = [i for i in range(240_000)]
+    for _ in range(epoch + 1):
+        random.shuffle(key_to_content_sample_range)
+    key_to_content_sample_range = [key_to_content_sample_range[:IR_task_sample_size_per_epoch]]
+
+    content_to_key_sample_range = [i for i in range(240_000)]
+    for _ in range(epoch + 1):
+        random.shuffle(content_to_key_sample_range)
+    content_to_key_sample_range = [content_to_key_sample_range[:IR_task_sample_size_per_epoch]]
+
+    additional_sentences = 4
+    include_targets = False
+    num_SP = 3
+    num_CN = 3
+    hop = 3
+    num_nodes_per_hop = 5
+    num_workers = 32
+    split = "train"
+    node_task_save_name = "_".join([SAVE_NAME_BASE, str(epoch)])
+    key_to_content_task_save_name = "_".join([SAVE_NAME_BASE, "IR_kc", str(epoch)])
+    content_to_key_task_save_name = "_".join([SAVE_NAME_BASE, "IR_ck", str(epoch)])
+    generate_default_task(dataset, split, sample_range, node_task_save_name, num_workers, hop, num_nodes_per_hop,
+                          node_task_list, additional_sentences, num_SP, num_CN, include_targets,
+                          key_to_content_sample_range, key_to_content_task_save_name, content_to_key_sample_range,
+                          content_to_key_task_save_name)
+def generate_wikikg90m(epoch):
+    dataset = "wikikg90m"
+    node_task_list = ["CS", "CN", "SP", "LP"]
+    node_task_sample_size_per_epoch = 100_000
+    IR_task_sample_size_per_epoch = 10_000
+    sample_range = [[epoch * node_task_sample_size_per_epoch + i for i in range(node_task_sample_size_per_epoch)]]
+
+    key_to_content_sample_range = [i for i in range(100_000_000)]
+    for _ in range(epoch + 1):
+        random.shuffle(key_to_content_sample_range)
+    key_to_content_sample_range = [key_to_content_sample_range[:IR_task_sample_size_per_epoch]]
+
+    content_to_key_sample_range = [i for i in range(100_000_000)]
+    for _ in range(epoch + 1):
+        random.shuffle(content_to_key_sample_range)
+    content_to_key_sample_range = [content_to_key_sample_range[:IR_task_sample_size_per_epoch]]
+
+    additional_sentences = 4
+    include_targets = False
+    num_SP = 2
+    num_CN = 2
+    num_LP = 2
+    hop = 3
+    num_nodes_per_hop = 5
+    num_workers = 32
+    split = "train"
+    node_task_save_name = "_".join([SAVE_NAME_BASE, str(epoch)])
+    key_to_content_task_save_name = "_".join([SAVE_NAME_BASE, "IR_kc", str(epoch)])
+    content_to_key_task_save_name = "_".join([SAVE_NAME_BASE, "IR_ck", str(epoch)])
+    generate_default_task(dataset, split, sample_range, node_task_save_name, num_workers, hop, num_nodes_per_hop,
+                          node_task_list, additional_sentences, num_SP, num_CN, include_targets,
+                          key_to_content_sample_range, key_to_content_task_save_name, content_to_key_sample_range,
+                          content_to_key_task_save_name, num_LP)
+
 
 if __name__ == "__main__":
-    DATA_ROOT = "../TAGDataset"
-    SAVE_NAME_BASE = "pretrain"
+    #sample_datasets = ["mag240m", "arxiv", "wiki_graph", "pubmed_node", "ultrachat200k", "wikikg90m"]
+    #sample_datasets = ["mag240m", "arxiv", "pubmed_node"]
+    # sample_datasets = ["wikikg90m"]
+    sample_datasets = ["wiki_graph"]
     SAMPLE_EPOCH = 1
-    START_EPOCH = 2
-    SAMPLE_DATASETS = ["wikikg90m"]
-    MAG_PRETRAIN_TASK_LIST = ["CS", "CN", "SP"]
-    WIKI_PRETRAIN_TASK_LIST = ["DS"]
-    ULTRA_PRETRAIN_TASK_LIST = ["DS"]
-    WIKIGRAPH_PRETRAIN_TASK_LIST = ["CS"]
-    ADDITIONAL_SENTENCES = 3
-    WIKIGRAPH_ADDITIONAL_SENTENCES = 1
-    SPLIT = "all"
-    ULTRA_SPLIT = "train"
-    WIKIGRAPH_SPLIT = "train"
-    WIKI_SPLIT = "train"
-    WIKIGRAPH_LEFT_KEEP_LENGTH = 0
-    LEFT_KEEP_LENGTH = 128
-    NUM_SP = 3
-    NUM_CN = 3
-    HOP = 3
-    NUM_NODES_PER_HOP = 5
-    NUM_WORKERS = 64
-    MAG_SAMPLE_SIZE_PER_EPOCH = 300_000
-    WIKI_SAMPLE_SIZE_PER_EPOCH = 50_000
-    UlTRA_SAMPLE_SIZE_PER_EPOCH = 100_000
-    WIKIGRAPH_SAMPLE_SIZE_PER_EPOCH = 50_000
-    INCLUDE_TARGETS = True
-    WIKIGRAPH_INCLUDE_TARGETS = False
-
-    MAG_SAMPLE_RANGES = [[i * MAG_SAMPLE_SIZE_PER_EPOCH + j for j in range(min(MAG_SAMPLE_SIZE_PER_EPOCH, 5_875_010 - i * MAG_SAMPLE_SIZE_PER_EPOCH))]
-                         for i in range(int(5_875_010/MAG_SAMPLE_SIZE_PER_EPOCH) + 1)]
-    WIKI_SAMPLE_RANGES = [[i * WIKI_SAMPLE_SIZE_PER_EPOCH + j for j in range(min(WIKI_SAMPLE_SIZE_PER_EPOCH, 5_000_000 - i * WIKI_SAMPLE_SIZE_PER_EPOCH))] for i in range(int(5_000_000/WIKI_SAMPLE_SIZE_PER_EPOCH) + 1)]
-    ULTRA_SAMPLE_RANGES = [[i * UlTRA_SAMPLE_SIZE_PER_EPOCH + j for j in range(min(UlTRA_SAMPLE_SIZE_PER_EPOCH, 314950 - i * UlTRA_SAMPLE_SIZE_PER_EPOCH))]
-                         for i in range(int(314950/UlTRA_SAMPLE_SIZE_PER_EPOCH) + 1)] ##44993 89986
-    WIKIGRAPH_SAMPLE_RANGES = [[i * WIKIGRAPH_SAMPLE_SIZE_PER_EPOCH + j for j in range(min(WIKIGRAPH_SAMPLE_SIZE_PER_EPOCH,
-        129_864 - i * WIKIGRAPH_SAMPLE_SIZE_PER_EPOCH))] for i in range(int(129_864/WIKIGRAPH_SAMPLE_SIZE_PER_EPOCH) + 1)]
+    START_EPOCH = 0
+    def random_seed(length):
+        random.seed()
+        min = 10 ** (length - 1)
+        max = 9 * min + (min - 1)
+        return random.randint(min, max)
+    seed = random_seed(10)
+    print("random seed: " + str(seed))
+    random.seed(seed)
+    torch.manual_seed(seed)
+    np.random.seed(seed)
 
 
-    for epoch in range(START_EPOCH, START_EPOCH + SAMPLE_EPOCH):
-        save_name = "_".join([SAVE_NAME_BASE, str(epoch)])
-        num_additional_sentences = ADDITIONAL_SENTENCES
-        include_targets = INCLUDE_TARGETS
-        left_keep_length = LEFT_KEEP_LENGTH
-        split = SPLIT
+    for dataset in sample_datasets:
+        for epoch in range(START_EPOCH, SAMPLE_EPOCH + START_EPOCH):
+            globals()["generate_" + dataset](epoch)
 
-        for dataset in SAMPLE_DATASETS:
-            if dataset == "mag240m":
-                sample_range = [MAG_SAMPLE_RANGES[epoch]]
-                pretrain_tasks = MAG_PRETRAIN_TASK_LIST
-            elif dataset == "wikikg90m":
-                sample_range = [WIKI_SAMPLE_RANGES[epoch]]
-                pretrain_tasks = WIKI_PRETRAIN_TASK_LIST
-                split = WIKI_SPLIT
-            elif dataset == "ultrachat200k":
-                sample_range = [ULTRA_SAMPLE_RANGES[epoch]]
-                pretrain_tasks = ULTRA_PRETRAIN_TASK_LIST
-                SPLIT = ULTRA_SPLIT
-            elif dataset == "wiki_graph":
-                sample_range = [WIKIGRAPH_SAMPLE_RANGES[epoch]]
-                pretrain_tasks = WIKIGRAPH_PRETRAIN_TASK_LIST
-                include_targets = WIKIGRAPH_INCLUDE_TARGETS
-                num_additional_sentences = WIKIGRAPH_ADDITIONAL_SENTENCES
-                left_keep_length = WIKIGRAPH_LEFT_KEEP_LENGTH
-                split = WIKIGRAPH_SPLIT
-            else:
-                raise NotImplementedError
 
-            task = GOFAPretrainTaskWrapper(task_names=dataset,
-                                           root=DATA_ROOT,
-                                           split=split,
-                                           sample_size=sample_range,
-                                           save_name=save_name,
-                                           save_data=True,
-                                           from_saved=False,
-                                           num_workers=NUM_WORKERS,
-                                           hop=HOP,
-                                           max_nodes_per_hop=NUM_NODES_PER_HOP,
-                                           pretrain_tasks=pretrain_tasks,
-                                           num_additional_sentences=num_additional_sentences,
-                                           num_SP=NUM_SP,
-                                           num_CN=NUM_CN,
-                                           include_targets=include_targets,
-                                           left_keep_length=left_keep_length,
-                                           )
-            gc.collect()
+
+

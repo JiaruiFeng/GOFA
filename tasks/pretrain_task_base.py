@@ -1,3 +1,4 @@
+import random
 from abc import ABC, abstractmethod
 from typing import (
     Callable,
@@ -35,6 +36,14 @@ def get_pretrain_task(tasks: Union[str, list[str]], **kwargs):
             return_tasks.append(CommonNeighbors(num_CN))
         elif task == "DS":
             return_tasks.append(DownstreamTask())
+        elif task == "IR":
+            content_to_key = False if "content_to_key" not in kwargs else kwargs["content_to_key"]
+            num_IR = 1 if "num_IR" not in kwargs else kwargs["num_IR"]
+            return_tasks.append(InformationRetrival(num_IR, content_to_key))
+        elif task == "LP":
+            lp_on_target = False if "lp_on_target" not in kwargs else kwargs["lp_on_target"]
+            num_LP = 1 if "num_LP" not in kwargs else kwargs["num_LP"]
+            return_tasks.append(LinkPrediction(num_LP, lp_on_target))
         else:
             raise ValueError("Task not defined.")
 
@@ -109,7 +118,7 @@ class CompleteSentence(PretrainTaskBase):
     Args:
         include_targets (bool): If ture, include all target nodes in the graph for the sentence completion.
         num_additional_sentences (int): The number of additional nodes for the sentence completion besides the target node set.
-        left_keep_length (int): For the sentence, the mask start position.
+        left_keep_length (int): The maximum left keep length in complete sentence.
     """
     def __init__(self, include_targets=True, num_additional_sentences: int = 0, left_keep_length: int = 0, **kwargs):
         super().__init__(**kwargs)
@@ -121,12 +130,14 @@ class CompleteSentence(PretrainTaskBase):
 
     def cut_sentence(self, text_feature):
         words = text_feature.split(" ")
-        if len(words) <= 1:
+        sentence_length = len(words)
+        if sentence_length <= 1:
             return " ".join(words), ""
-        elif len(words) <= self.left_keep_length * 2:
-            left_keep_length = len(words) // 2
+        elif sentence_length // 2 > self.left_keep_length:
+            max_left_length = self.left_keep_length
         else:
-            left_keep_length = self.left_keep_length
+            max_left_length = sentence_length // 2
+        left_keep_length = randint(0, max_left_length)
         left_words = words[:left_keep_length]
         right_words = words[left_keep_length:]
         return " ".join(left_words), " ".join(right_words)
@@ -245,10 +256,12 @@ class ShortestPath(PretrainTaskBase):
         answer_list = []
         label_list = []
         target_index_list = []
+        non_target_index = [i for i in range(num_nodes) if i not in target_index]
         for _ in range(self.num_SP):
             if self.from_target:
                 i = target_index[torch.randperm(len(target_index))[0]].item()
-                j = randint(0, num_nodes-1)
+                j = random.choice(non_target_index)
+                non_target_index.remove(j)
             else:
                 node_pair = torch.randperm(num_nodes)[:2]
                 i, j = node_pair[0].item(), node_pair[1].item()
@@ -333,10 +346,12 @@ class CommonNeighbors(PretrainTaskBase):
         answer_list = []
         label_list = []
         target_index_list = []
+        non_target_index = [i for i in range(num_nodes) if i not in target_index]
         for _ in range(self.num_CN):
             if self.from_target:
                 i = target_index[torch.randperm(len(target_index))[0]].item()
-                j = randint(0, num_nodes-1)
+                j = random.choice(non_target_index)
+                non_target_index.remove(j)
             else:
                 node_pair = torch.randperm(num_nodes)[:2]
                 i, j = node_pair[0].item(), node_pair[1].item()
@@ -391,6 +406,7 @@ def single_node_graph_complete_sentence(data, **kwargs):
     data.edge_attr = np.array([], dtype=object)
     #data.question = np.array(["Please complete the sentence of the target node."], dtype=object)
     data.question[0] = data.question[0].replace(f"[NODE_INDEX {target_index[0]}]", f"[NODE_INDEX 0]")
+    data.question = data.question[[0]]
     data.question_map = torch.tensor([0], dtype=torch.long)
     data.answer = data.answer[[0]]
     data.answer_map = torch.tensor([0], dtype=torch.long)
@@ -398,3 +414,120 @@ def single_node_graph_complete_sentence(data, **kwargs):
     data.label_map = torch.tensor([0], dtype=torch.long)
     data.target_index = [[0]]
     return data
+
+
+class InformationRetrival(PretrainTaskBase):
+    r"""Information retrival task. The task contains two modes. In default mode, the task ask model to retrival content based on node ID.
+    If set content_to_key to True, the task as model to retrival node ID based on content.
+    Args:
+        num_IR (int): Number of information retrival task to generate.
+        content_to_key (bool): If true, the task become ask model the node ID given node content.
+    """
+    def __init__(self, num_IR, content_to_key=False, **kwargs):
+        self.num_IR = num_IR
+        self.content_to_key = content_to_key
+
+    def before_process(self, task_class, **kwargs):
+        return
+
+
+    def build_sample(
+            self,
+            task_class: BaseTask,
+            node_map: LongTensor,
+            edge_index: LongTensor,
+            target_index: LongTensor,
+            **kwargs):
+
+        content_to_key_prompt = "Please give the ID of the node which contains the following content: "
+        key_to_content_prompt = "Please output the content of node [NODE_INDEX <i>]."
+
+
+        num_nodes = len(node_map)
+        question_list = []
+        answer_list = []
+        label_list = []
+        target_index_list = []
+        for _ in range(self.num_IR):
+            # random select a numer k in (2, num_nodes)
+            k = randint(2, num_nodes)
+            # random select k nodes from graph.
+            selected_index = torch.randperm(num_nodes)[:k]
+            target_index_list.append(selected_index.tolist())
+            # random select node to be the answer node.
+            answer_index = selected_index[torch.randperm(k)[0]]
+            if self.content_to_key:
+                question = content_to_key_prompt + task_class.data.x[node_map[answer_index]]
+                answer = "[NODE_INDEX <i>]".replace("<i>", str(answer_index.item()))
+            else:
+                question = key_to_content_prompt.replace("<i>", str(answer_index.item()))
+                answer = task_class.data.x[node_map[answer_index]]
+            label = answer
+            question_list.append(question)
+            answer_list.append(answer)
+            label_list.append(label)
+
+        return_dict = {
+            "questions": question_list,
+            "answers": answer_list,
+            "labels": label_list,
+            "target_index": target_index_list,
+        }
+        return return_dict
+
+    def after_process(self, task_class, **kwargs):
+        return
+
+
+class LinkPrediction(PretrainTaskBase):
+    r"""Link prediction task. Randomly select one edge, remove the edge and ask the model to predict the content in the edge.
+
+    Args:
+        num_LP (int): Number of link prediction task to generate.
+        lp_on_target (bool): If true, construct LP task on target node. Should be set to true only when base task are link task.
+    """
+    def __init__(self, num_LP, lp_on_target=False, **kwargs):
+        self.num_LP = num_LP
+        self.lp_on_target = lp_on_target
+
+    def before_process(self, task_class, **kwargs):
+        return
+
+    def build_sample(
+            self,
+            task_class: BaseTask,
+            node_map: LongTensor,
+            edge_index: LongTensor,
+            target_index: LongTensor,
+            **kwargs):
+        edge_map = kwargs["edge_map"]
+        prompt = ("There exist one edge between source node [NODE_INDEX <i>] and target node [NODE_INDEX <j>]. "
+                  "Could you generate correct content in the edge based on information in two nodes?")
+        num_edges = edge_index.size(-1)
+        question_list = []
+        answer_list = []
+        label_list = []
+        target_index_list = []
+        # random select num_LP edges
+        selected_indexs = torch.randperm(num_edges)[:self.num_LP]
+        remove_edges = []
+        for index in selected_indexs:
+            edge = edge_index[:, index]
+            remove_edges.extend([edge.tolist(), edge[[1, 0]].tolist()])
+            target_index_list.append(edge.tolist())
+            question_list.append(prompt.replace("<i>", str(edge[0].item())).replace("<j>", str(edge[1].item())))
+            answer_list.append(task_class.data.edge_attr[edge_map[index]])
+
+        keep_edges = torch.tensor([i for i in range(num_edges) if edge_index[:, i].tolist()
+                                   not in remove_edges], dtype=torch.long)
+        return_dict = {
+            "questions": question_list,
+            "answers": answer_list,
+            "labels": label_list,
+            "target_index": target_index_list,
+            "keep_edges": keep_edges
+        }
+        return return_dict
+
+    def after_process(self, task_class, **kwargs):
+        return

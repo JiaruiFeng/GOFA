@@ -58,15 +58,21 @@ def main(params):
         ######################################################################################################
         #                                          Pretrain Task                                             #
         ######################################################################################################
+        task_names = ["mag240m", "mag240m", "mag240m", "arxiv", "arxiv", "arxiv", "pubmed_node", "pubmed_node", "pubmed_node",
+                      "wiki_graph", "wiki_graph", "wiki_graph", "wikikg90m", "wikikg90m", "wikikg90m", "ultrachat200k"]
 
-        train_task = GOFAPretrainTaskWrapper(["mag240m", "ultrachat200k", "wiki_graph", "wikikg90m"], root=params.data_root_path,
-                                            save_name=f"pretrain_{params.last_epochs}", fast_data_load=True)
+        save_names = ["pretrain_", "pretrain_IR_kc_", "pertrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pertrain_IR_ck_",
+                      "pretrain_", "pretrain_IR_kc_", "pertrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pertrain_IR_ck_",
+                      "pretrain_", "pretrain_IR_kc_", "pertrain_IR_ck_", "pretrain_"]
 
-        val_tasks = GOFAPretrainTaskWrapper(["arxiv", "ultrachat200k"], root=params.data_root_path,
+        save_names = [name + str(params.last_epochs) for name in save_names]
+        train_task = GOFAPretrainTaskWrapper(task_names, root=params.data_root_path, save_name=save_names, fast_data_load=True)
+
+        val_tasks = GOFAPretrainTaskWrapper(["cora", "ultrachat200k"], root=params.data_root_path,
                                             split="val", sample_size=100, save_name="pretrain_val",
                                             num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
 
-        test_tasks = GOFAPretrainTaskWrapper(["arxiv", "ultrachat200k"], root=params.data_root_path,
+        test_tasks = GOFAPretrainTaskWrapper(["cora", "ultrachat200k"], root=params.data_root_path,
                                             split="test", sample_size=100, save_name="pretrain_test",
                                             num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
 

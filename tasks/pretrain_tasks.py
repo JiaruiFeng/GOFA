@@ -46,15 +46,17 @@ class GOFAGraphPretrainTask(GQATask):
         new_target_index_list = []
         for task in self.pretrain_tasks:
             return_dict = task.build_sample(
-                task_class=self, node_map=node_map, edge_index=edge_index, target_index=target_index, label_map=label_map)
+                task_class=self, node_map=node_map, edge_index=edge_index, target_index=target_index, label_map=label_map, edge_map=edge_map)
             question_list.extend(return_dict["questions"])
             answer_list.extend(return_dict["answers"])
             label_list.extend(return_dict["labels"])
             new_target_index_list.extend(return_dict["target_index"])
             if node_map in return_dict:
                 node_map = return_dict["node_map"]
-            if "edge_index" in return_dict:
-                edge_index = return_dict["edge_index"]
+            if "keep_edges" in return_dict:
+                keep_edges = return_dict["keep_edges"]
+                edge_index = edge_index[:, keep_edges]
+                edge_map = edge_map[keep_edges]
 
         target_index = new_target_index_list
         return TAGData(edge_index=edge_index, node_map=node_map, edge_map=edge_map, target_index=target_index,
@@ -138,6 +140,14 @@ class GOFANodePretrainTask(NQATask):
         super().__init__(**kwargs)
 
 
+    def __process_split_and_label__(self):
+        if self.dataset.name == "mag240m" and self.split == "all":
+            num_nodes = len(self.dataset.x)
+            return (torch.tensor([i for i in range(num_nodes)]), torch.tensor([0 for _ in range(num_nodes)]),
+                    torch.tensor([0 for _ in range(num_nodes)]))
+        else:
+            return super().__process_split_and_label__()
+
     def __before_process__(self) -> None:
         super().__before_process__()
         for task in self.pretrain_tasks:
@@ -162,15 +172,17 @@ class GOFANodePretrainTask(NQATask):
         new_target_index_list = []
         for task in self.pretrain_tasks:
             return_dict = task.build_sample(
-                task_class=self, node_map=node_map, edge_index=edge_index, target_index=target_index, label_map=label_map)
+                task_class=self, node_map=node_map, edge_index=edge_index, target_index=target_index, label_map=label_map, edge_map=edge_map)
             question_list.extend(return_dict["questions"])
             answer_list.extend(return_dict["answers"])
             label_list.extend(return_dict["labels"])
             new_target_index_list.extend(return_dict["target_index"])
             if node_map in return_dict:
                 node_map = return_dict["node_map"]
-            if "edge_index" in return_dict:
-                edge_index = return_dict["edge_index"]
+            if "keep_edges" in return_dict:
+                keep_edges = return_dict["keep_edges"]
+                edge_index = edge_index[:, keep_edges]
+                edge_map = edge_map[keep_edges]
 
         target_index = new_target_index_list
         return TAGData(edge_index=edge_index, node_map=node_map, edge_map=edge_map, target_index=target_index,
@@ -277,15 +289,17 @@ class GOFALinkPretrainTask(LQATask):
         new_target_index_list = []
         for task in self.pretrain_tasks:
             return_dict = task.build_sample(
-                task_class=self, node_map=node_map, edge_index=edge_index, target_index=target_index, label_map=label_map)
+                task_class=self, node_map=node_map, edge_index=edge_index, target_index=target_index, label_map=label_map, edge_map=edge_map)
             question_list.extend(return_dict["questions"])
             answer_list.extend(return_dict["answers"])
             label_list.extend(return_dict["labels"])
             new_target_index_list.extend(return_dict["target_index"])
             if node_map in return_dict:
                 node_map = return_dict["node_map"]
-            if "edge_index" in return_dict:
-                edge_index = return_dict["edge_index"]
+            if "keep_edges" in return_dict:
+                keep_edges = return_dict["keep_edges"]
+                edge_index = edge_index[:, keep_edges]
+                edge_map = edge_map[keep_edges]
 
         target_index = new_target_index_list
         return TAGData(edge_index=edge_index, node_map=node_map, edge_map=edge_map, target_index=target_index,
