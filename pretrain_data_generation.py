@@ -12,7 +12,7 @@ CS_MAX_LEFT_KEEP_LENGTH = 128
 def generate_default_task(dataset, split, sample_range, node_task_save_name, num_workers, hop, num_nodes_per_hop,
                           node_task_list, additional_sentences,num_SP, num_CN, include_targets,
                           key_to_content_sample_range, key_to_content_task_save_name, content_to_key_sample_range,
-                          content_to_key_task_save_name, num_LP=1):
+                          content_to_key_task_save_name, num_LP=1, SP_from_targets=True, CN_from_targets=True):
 
     node_task = GOFAPretrainTaskWrapper(task_names=dataset,
                                         root=DATA_ROOT,
@@ -31,6 +31,8 @@ def generate_default_task(dataset, split, sample_range, node_task_save_name, num
                                         include_targets=include_targets,
                                         left_keep_length=CS_MAX_LEFT_KEEP_LENGTH,
                                         num_LP=num_LP,
+                                        SP_from_targets=SP_from_targets,
+                                        CN_from_targets=CN_from_targets,
                                         )
     del node_task
     gc.collect()
@@ -176,7 +178,7 @@ def generate_ultrachat200k(epoch):
 
 def generate_wiki_graph(epoch):
     dataset = "wiki_graph"
-    node_task_list = ["CS", "CN", "SP"]
+    node_task_list = ["CS", "CN", "SP", "LP"]
     node_task_sample_size_per_epoch = 80_000
     IR_task_sample_size_per_epoch = 10_000
     sample_range = [[epoch * node_task_sample_size_per_epoch + i for i in range(node_task_sample_size_per_epoch)]]
@@ -193,8 +195,11 @@ def generate_wiki_graph(epoch):
 
     additional_sentences = 4
     include_targets = False
-    num_SP = 3
-    num_CN = 3
+    SP_from_targets = False
+    CN_from_targets = False
+    num_SP = 2
+    num_CN = 2
+    num_LP = 2
     hop = 3
     num_nodes_per_hop = 5
     num_workers = 32
@@ -205,7 +210,7 @@ def generate_wiki_graph(epoch):
     generate_default_task(dataset, split, sample_range, node_task_save_name, num_workers, hop, num_nodes_per_hop,
                           node_task_list, additional_sentences, num_SP, num_CN, include_targets,
                           key_to_content_sample_range, key_to_content_task_save_name, content_to_key_sample_range,
-                          content_to_key_task_save_name)
+                          content_to_key_task_save_name, num_LP, SP_from_targets, CN_from_targets)
 def generate_wikikg90m(epoch):
     dataset = "wikikg90m"
     node_task_list = ["CS", "CN", "SP", "LP"]
@@ -225,6 +230,8 @@ def generate_wikikg90m(epoch):
 
     additional_sentences = 4
     include_targets = False
+    SP_from_targets = False
+    CN_from_targets = False
     num_SP = 2
     num_CN = 2
     num_LP = 2
@@ -238,22 +245,22 @@ def generate_wikikg90m(epoch):
     generate_default_task(dataset, split, sample_range, node_task_save_name, num_workers, hop, num_nodes_per_hop,
                           node_task_list, additional_sentences, num_SP, num_CN, include_targets,
                           key_to_content_sample_range, key_to_content_task_save_name, content_to_key_sample_range,
-                          content_to_key_task_save_name, num_LP)
+                          content_to_key_task_save_name, num_LP, SP_from_targets, CN_from_targets)
 
 
 if __name__ == "__main__":
     #sample_datasets = ["mag240m", "arxiv", "wiki_graph", "pubmed_node", "ultrachat200k", "wikikg90m"]
-    #sample_datasets = ["mag240m", "arxiv", "pubmed_node"]
+    sample_datasets = ["mag240m", "arxiv", "pubmed_node"]
     # sample_datasets = ["wikikg90m"]
     sample_datasets = ["wiki_graph"]
-    SAMPLE_EPOCH = 1
+    SAMPLE_EPOCH = 3
     START_EPOCH = 0
     def random_seed(length):
         random.seed()
         min = 10 ** (length - 1)
         max = 9 * min + (min - 1)
         return random.randint(min, max)
-    seed = random_seed(10)
+    seed = random_seed(8)
     print("random seed: " + str(seed))
     random.seed(seed)
     torch.manual_seed(seed)

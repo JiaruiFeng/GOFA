@@ -30,10 +30,12 @@ def get_pretrain_task(tasks: Union[str, list[str]], **kwargs):
             return_tasks.append(CompleteSentence(include_targets, num_additional_sentences, left_keep_length))
         elif task == "SP":
             num_SP = 1 if "num_SP" not in kwargs else kwargs["num_SP"]
-            return_tasks.append(ShortestPath(num_SP))
+            SP_from_targets = True if "SP_from_targets" not in kwargs else kwargs["SP_from_targets"]
+            return_tasks.append(ShortestPath(num_SP, from_target=SP_from_targets))
         elif task == "CN":
             num_CN = 1 if "num_CN" not in kwargs else kwargs["num_CN"]
-            return_tasks.append(CommonNeighbors(num_CN))
+            CN_from_targets = True if "CN_from_targets" not in kwargs else kwargs["CN_from_targets"]
+            return_tasks.append(CommonNeighbors(num_CN, from_target=CN_from_targets))
         elif task == "DS":
             return_tasks.append(DownstreamTask())
         elif task == "IR":
@@ -260,6 +262,8 @@ class ShortestPath(PretrainTaskBase):
         for _ in range(self.num_SP):
             if self.from_target:
                 i = target_index[torch.randperm(len(target_index))[0]].item()
+                if len(non_target_index) == 0:
+                    non_target_index = [i for i in range(num_nodes) if i not in target_index]
                 j = random.choice(non_target_index)
                 non_target_index.remove(j)
             else:
@@ -350,6 +354,8 @@ class CommonNeighbors(PretrainTaskBase):
         for _ in range(self.num_CN):
             if self.from_target:
                 i = target_index[torch.randperm(len(target_index))[0]].item()
+                if len(non_target_index) == 0:
+                    non_target_index = [i for i in range(num_nodes) if i not in target_index]
                 j = random.choice(non_target_index)
                 non_target_index.remove(j)
             else:
