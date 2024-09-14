@@ -10,7 +10,8 @@ import string
 import numpy as np
 
 def generate_random_node_order(num_nodes: int):
-    return torch.randperm(num_nodes)
+    order, _ = torch.sort(torch.randperm(676)[:num_nodes])
+    return order
 
 def generate_alphabet_id():
     # support graph with less than 26 * 26 nodes.

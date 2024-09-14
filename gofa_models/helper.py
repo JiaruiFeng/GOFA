@@ -13,8 +13,7 @@ class GOFALlamaHelper(torch.nn.Module):
         super().__init__()
         model_args, training_args, gofa_args = transformer_args
         model = LlamaICAE(model_args, training_args, gofa_args)  # restored llama2-7b-chat model
-        state_dict = torch.load(
-            "./cache_data/model/llama-2-7b-chat-finetuned-icae_zeroweight_llama2.pt")  # change the path for your model
+        state_dict = torch.load(model_args.llama_pretrain_checkpoint)  # change the path for your model
         new_state_dict = OrderedDict()
 
         for layer_name, weight in state_dict.items():
@@ -274,7 +273,7 @@ class GOFAMistralHelper(torch.nn.Module):
         super().__init__()
         model_args, training_args, gofa_args = transformer_args
         model = MistralICAE(model_args, training_args, gofa_args)  # restored llama2-7b-chat model
-        state_dict = load_file("./cache_data/model/mistral_7b_ft_icae.safetensors")  # change the path for your model
+        state_dict = load_file(model_args.mistral_pretrain_checkpoint)  # change the path for your model
         new_state_dict = OrderedDict()
         for layer_name, weight in state_dict.items():
             new_state_dict[layer_name.replace("default", "encadapt")] = weight
@@ -546,6 +545,7 @@ class LlamaHelper(torch.nn.Module):
         pass
 
     def forward(self, data, input, prompt=None):
+        # print(self.model.training_args.model_max_length)
         cur_device = self.model.icae.get_base_model().model.embed_tokens.weight.device
         prompt_output = self.model.tokenizer(data, add_special_tokens=False, padding=False, truncation=True,
                                        max_length=self.model.training_args.model_max_length)["input_ids"]
@@ -602,7 +602,7 @@ class LlamaHelper(torch.nn.Module):
         prompt_answer_ids = prompt_ids.to(device=cur_device, dtype=torch.long)
 
         with torch.no_grad():
-            outputs = self.model.icae.generate(prompt_answer_ids, max_length=1024, num_return_sequences=1, pad_token_id = self.model.eos_id)
+            outputs = self.model.icae.generate(prompt_answer_ids, max_length=2048, num_return_sequences=1, pad_token_id = self.model.eos_id)
 
         generated_text = [self.model.tokenizer.decode(output, skip_special_tokens=True) for output in outputs]
         generated_text = [self.extract_content_after_inst(t) for t in generated_text]

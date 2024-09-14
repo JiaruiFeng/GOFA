@@ -8,7 +8,7 @@ conda env create -f environment.yml
 ```
 
 Next, please download the pretrained checkpoint of ICAE from [here](https://huggingface.co/sggetao/icae/tree/main). Specifically, download and put
-the following files `llama-2-7b-chat-finetuned-icae_zeroweight_llama2.pt` and `mistral_7b_pretrained_icae.safetensors` into directory `./cache_data/model/`
+the following files `llama-2-7b-chat-finetuned-icae_zeroweight_llama2.pt` and `mistral_7b_ft_icae.safetensors` into directory `./cache_data/model/`
 
 Finally, clone the code of datasets we used from [TAGLAS](https://github.com/JiaruiFeng/TAGLAS) by running:
 ```

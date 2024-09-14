@@ -67,8 +67,14 @@ class GOFA(torch.nn.Module):
         elif mode == "nograph":
             self.encode = self.llm_decode
             self.decode = lambda x: x
+        elif mode == "nographft":
+            self.encode = self.llm_ft
+            self.decode = lambda x: x
         elif mode == "nographgen":
             self.encode = self.llm_gen
+            self.decode = lambda x: x
+        elif mode == "nographgentemp":
+            self.encode = self.llm_gen_scene_graph
             self.decode = lambda x: x
         else:
             # TODO: not implemented
@@ -86,6 +92,53 @@ class GOFA(torch.nn.Module):
         GNNLMOutput = namedtuple("GNNLMOutput", ["logits", "answer_id", "pred_text", "answer"])
         return GNNLMOutput(logits=answer_logits[masks], pred_text=self.logit_to_text(answer_logits, masks),
                            answer_id=answer_id, answer=answer_texts)
+
+    def llm_ft(self, g):
+        text_inputs = g.x[g.node_map.cpu().numpy()][g.question_index.cpu().numpy()].tolist()
+        all_x = g.x[g.node_map.cpu().numpy()].tolist()
+        truncated_x = [t[:80] for t in all_x[1:]]
+        all_x = ' '.join(all_x[:1] + truncated_x)
+        com_text_inputs = []
+        for i in range(len(text_inputs)):
+            # add edge text description
+            edge_t = g.node_ids[i][g.edge_index.cpu()[:,:-2]]
+            edge_t = ', '.join(edge_t[0] + ' connects to ' + edge_t[1])
+            t = all_x + '. ' + edge_t + '. ' + g.question[i]
+            # t = text_inputs[i] + g.question[i]
+            com_text_inputs.append(t)
+        answer_texts = g.answer[g.answer_map.cpu().numpy()].tolist()
+
+        answer_logits, answer_id, masks = self.llm_model(answer_texts, com_text_inputs)
+        GNNLMOutput = namedtuple("GNNLMOutput", ["logits", "answer_id", "pred_text", "answer"])
+        return GNNLMOutput(logits=answer_logits[masks], pred_text=self.logit_to_text(answer_logits, masks),
+                           answer_id=answer_id, answer=answer_texts)
+
+    def llm_gen_scene_graph(self, g):
+        text_inputs = g.x[g.node_map.cpu().numpy()][g.question_index.cpu().numpy()].tolist()
+        all_x = g.x[g.node_map.cpu().numpy()].tolist()
+        # truncated_x = [t[:t.find("(x,y,w,h)")] for t in all_x]
+        truncated_x = [t for t in all_x]
+        all_x = ' '.join(all_x[:1] + truncated_x)
+        com_text_inputs = []
+        for i in range(len(text_inputs)):
+            edge_t = g.node_ids[i][g.edge_index.cpu()[:,:-2*len(g.node_map)]]
+            edge_t = ', '.join(edge_t[0] + ' connects to ' + edge_t[1])
+            # t = all_x + '. ' + edge_t + '. ' + g.question[i]
+            t = all_x + '. ' + '. ' + g.question[i]
+            t = '[INST]\n' + t + g.question[i] + '\n[/INST]\n\n'
+            com_text_inputs.append(t)
+
+        answer_texts = g.answer[g.answer_map.cpu().numpy()].tolist()
+        generated_text = self.llm_model.generate(com_text_inputs)
+        for i, txt in enumerate(generated_text):
+            print_fixed_length(f"question: {com_text_inputs}")
+            print("-" * 120)
+            print_text_side_by_side("target: " + answer_texts[i], "gen: " + generated_text[i])
+            print("=" * 120)
+        GNNLMOutput = namedtuple("GNNLMOutput", ["logits", "answer_id", "pred_text", "answer"])
+        return GNNLMOutput(logits=torch.randn([1, 32132]), pred_text=generated_text, answer_id=torch.tensor([1]),
+                           answer=answer_texts)
+
 
     def llm_gen(self, g):
         text_inputs = g.x[g.node_map.cpu().numpy()][g.question_index.cpu().numpy()].tolist()
