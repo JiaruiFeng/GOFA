@@ -145,7 +145,7 @@ def pubmed_link_prompt(data, task_class, instruction=True, **kwargs):
 def arxiv_prompt(data, task_class, selection=True, way=-1, instruction=True, **kwargs):
     question = data.question
     graph_description = task_class.dataset.graph_description
-    label_list = task_class.dataset.label
+    label_list = task_class.dataset.label[:-2]
     if selection:
         label_selection_list = sample_k_labels_with_true(label_list, data.label_map.item(), way=way)
         selection_prompt = " Choose from the following: " + "; ".join(label_selection_list) + "."

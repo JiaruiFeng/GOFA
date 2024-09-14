@@ -60,7 +60,7 @@ def main(params):
 
         train_task = GOFAPretrainTaskWrapper(["mag240m", "ultrachat200k", "wiki_graph", "wikikg90m"],
                                              root=params.data_root_path,
-                                             save_name=[f"pretrain_cuthalf_{params.last_epochs}",
+                                             save_name=[f"pretrain_{params.last_epochs}",
                                                         f"pretrain_{params.last_epochs}",
                                                         f"pretrain_{params.last_epochs}",
                                                         f"pretrain_{params.last_epochs}"], fast_data_load=True)
@@ -115,14 +115,14 @@ def main(params):
                                              max_nodes_per_hop=params.train_max_nodes_per_hops,
                                              sample_size=params.sample_size_per_task, filter_func=data_size_filter,
                                              way=params.ways, num_workers=params.num_workers,
-                                             instruction=params.instructs, selection=params.selections)
+                                             instruction=params.instructs, selection=params.selections, from_saved=True, save_data=True)
 
         n_steps = int(len(train_task) * params.num_epochs / (params.grad_acc_step * int(torch.cuda.device_count())))
         val_tasks = [GOFAFineTuneTaskWrapper(task_name, root=params.data_root_path, split="val", hop=hop,
                                              max_nodes_per_hop=max_nodes_per_hop,
                                              sample_size=params.inf_sample_size_per_task,
                                              num_workers=params.num_workers, way=way, instruction=instruct,
-                                             selections=selection) for
+                                             selections=selection, from_saved=True, save_data=True) for
                      task_name, hop, max_nodes_per_hop, way, instruct, selection in
                      zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops, params.inf_ways,
                          params.inf_instructs, params.inf_selections)]
@@ -131,7 +131,7 @@ def main(params):
                                               max_nodes_per_hop=max_nodes_per_hop,
                                               sample_size=params.inf_sample_size_per_task,
                                               num_workers=params.num_workers, way=way, instruction=instruct,
-                                              selections=selection) for
+                                              selections=selection, from_saved=True, save_data=True) for
                       task_name, hop, max_nodes_per_hop, way, instruct, selection in
                       zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops, params.inf_ways,
                           params.inf_instructs, params.inf_selections)]
