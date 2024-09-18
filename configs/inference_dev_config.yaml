@@ -1,4 +1,4 @@
-run_mode: "pretrain"
+run_mode: "inf"
 num_epochs: 0
 offline_log: False
 mode: autoencoder

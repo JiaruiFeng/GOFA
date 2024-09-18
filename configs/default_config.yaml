@@ -1,6 +1,6 @@
-root_path: ""
+root_path: "./"
 data_root_path: "./TAGDataset"
-llama_pretrain_checkpoint: "../cache_data/cache_data/model/llama-2-7b-chat-finetuned-icae_zeroweight_llama2.pt"
+llama_pretrain_checkpoint: "./cache_data/cache_data/model/llama-2-7b-chat-finetuned-icae_zeroweight_llama2.pt"
 mistral_pretrain_checkpoint: "./cache_data/model/mistral_7b_ft_icae.safetensors"
 num_bases: 4
 emb_dim: 1024
