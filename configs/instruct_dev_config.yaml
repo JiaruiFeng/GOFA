@@ -1,6 +1,6 @@
 run_mode: "ft"
 load_model: True
-load_dir: "/project/tantra/jerry.kong/repo/OFAv2/qamag03_best_ckpt.pth"
+load_dir: "../mem_ckpt.pth"
 last_epochs: 0
 num_epochs: 1
 mode: autoencoder
