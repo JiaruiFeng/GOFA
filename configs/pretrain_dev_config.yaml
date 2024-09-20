@@ -1,4 +1,17 @@
-data_root_path: "/storage1/yinjie.tang/Active/feng.jiarui/TAGDataset"
 ckpt_path:
-last_epochs: 0
+load_dir:
+last_epochs: 1
 num_epochs: 1
+grad_acc_step: 32
+l2: 0.1
+lr: 0.0003
+mode: "autoencoder"
+load_model: True
+save_model:
+  save: True
+  steps:
+  monitor: False
+  time: 5
+  epochs:
+  top_k: -1
+  last: True

@@ -7,8 +7,11 @@ from gp.lightning.module_template import BaseTemplate
 import torch
 from lightning.pytorch.core.optimizer import LightningOptimizer
 from torch.optim import Optimizer
-
-
+# from dataclasses import dataclass, field
+# from torch import Tensor
+# import traceback
+# from lightning.pytorch.loops.optimization.automatic import Closure
+# from functools import partial
 
 class GraphPredLightning(BaseTemplate):
     def forward(self, batch):
@@ -97,3 +100,28 @@ class GraphTextPredLightning(BaseTemplate):
             else:
                 raise e
 
+    #
+    #
+    # def optimizer_step(
+    #     self,
+    #     epoch: int,
+    #     batch_idx: int,
+    #     optimizer: Union[Optimizer, LightningOptimizer],
+    #     optimizer_closure: Optional[Callable[[], Any]] = None,
+    # ) -> None:
+    #     try:
+    #         output = optimizer_closure()
+    #         def dummy_closure():
+    #             return output
+    #         optimizer.step(dummy_closure)
+    #     except Exception as e:
+    #         if "out of memory" in str(e):
+    #             print("Ignoring optimizer OOM batch")
+    #             print(traceback.format_exc())
+    #             make_dummy_batch(optimizer_closure._step_fn.args[0]["batch"])
+    #             output = optimizer_closure()
+    #             def dummy_closure():
+    #                 return output
+    #             optimizer.step(dummy_closure)
+    #         else:
+    #             raise e
