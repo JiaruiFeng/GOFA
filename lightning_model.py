@@ -82,24 +82,6 @@ class GraphTextPredLightning(BaseTemplate):
                 raise e
         return loss
 
-
-    def optimizer_step(
-        self,
-        epoch: int,
-        batch_idx: int,
-        optimizer: Union[Optimizer, LightningOptimizer],
-        optimizer_closure: Optional[Callable[[], Any]] = None,
-    ) -> None:
-        try:
-            optimizer_closure()
-            optimizer.step()
-            print(optimizer.param_groups[0]["lr"])
-        except Exception as e:
-            if "out of memory" in str(e):
-                print("Ignoring optimizer OOM batch")
-            else:
-                raise e
-
     #
     #
     # def optimizer_step(
