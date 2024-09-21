@@ -67,26 +67,26 @@ def main(params):
         ######################################################################################################
         #                                          Pretrain Task                                             #
         ######################################################################################################
-        # task_names = ["mag240m", "mag240m", "mag240m", "arxiv", "arxiv", "arxiv", "pubmed_node", "pubmed_node", "pubmed_node",
-        #               "wiki_graph", "wiki_graph", "wiki_graph", "wikikg90m", "wikikg90m", "wikikg90m", "ultrachat200k"]
-        #
-        # save_names = ["pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_",
-        #               "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_",
-        #               "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_"]
+        task_names = ["mag240m", "mag240m", "mag240m", "arxiv", "arxiv", "arxiv", "pubmed_node", "pubmed_node", "pubmed_node",
+                      "wiki_graph", "wiki_graph", "wiki_graph", "wikikg90m", "wikikg90m", "wikikg90m", "ultrachat200k"]
 
-        task_names = ["pubmed_node"]
-        save_names = ["pretrain_"]
+        save_names = ["pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_",
+                      "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_",
+                      "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_"]
+        #
+        # task_names = ["pubmed_node"]
+        # save_names = ["pretrain_"]
 
         filter_func = data_size_filter
         save_names = [name + str(params.last_epochs + 1) for name in save_names]
         train_task = GOFAPretrainTaskWrapper(task_names, root=params.data_root_path, save_name=save_names,
                                              fast_data_load=True, filter_func=filter_func)
 
-        val_tasks = GOFAPretrainTaskWrapper("cora", root=params.data_root_path, from_saved=False,
+        val_tasks = GOFAPretrainTaskWrapper("cora", root=params.data_root_path,
                                             split="val", sample_size=100, save_name="pretrain_val", pretrain_tasks=["CS", "CN", "SP"],
                                             num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
 
-        test_tasks = GOFAPretrainTaskWrapper("cora", root=params.data_root_path, from_saved=False,
+        test_tasks = GOFAPretrainTaskWrapper("cora", root=params.data_root_path,
                                             split="test", sample_size=100, save_name="pretrain_test", pretrain_tasks=["CS", "CN", "SP"],
                                             num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
 
@@ -237,7 +237,6 @@ def main(params):
             model.load_partial(state_dict=partial_dict)
         else:
             model.load_partial(load_dir=params.load_dir)
-    train_params = list(model.llm_model.model.icae.get_base_model().model.g_layers.parameters())
     strategy = "deepspeed_stage_2" if torch.cuda.device_count() > 1 else "auto"
 
     if params.run_mode == "inf":

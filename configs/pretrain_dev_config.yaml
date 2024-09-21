@@ -1,11 +1,11 @@
 ckpt_path:
 load_dir: "./cache_data/best_ckpt.pth"
 last_epochs: 0
-num_epochs: 0
+num_epochs: 1
 grad_acc_step: 32
 l2: 0.1
 lr: 0.0003
-mode: "autoencodergen"
+mode: "autoencoder"
 load_model: True
 save_model:
   save: True
