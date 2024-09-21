@@ -179,6 +179,7 @@ def main(params):
 
     model = GOFA(transformer_args=[model_args, training_args, gofa_args], mode=params.mode, base_llm=params.base_llm, save_dir=params.exp_dir)
     train_params = list(model.llm_model.model.icae.get_base_model().model.g_layers.parameters())
+    print(train_params[0])
     if model_args.dec_lora:
         for name, param in model.llm_model.model.icae.named_parameters():
             if "default" in name and "lora" in name:
@@ -237,7 +238,8 @@ def main(params):
             model.load_partial(state_dict=partial_dict)
         else:
             model.load_partial(load_dir=params.load_dir)
-
+    train_params = list(model.llm_model.model.icae.get_base_model().model.g_layers.parameters())
+    print(train_params[0])
     strategy = "deepspeed_stage_2" if torch.cuda.device_count() > 1 else "auto"
 
     if params.run_mode == "inf":
