@@ -5,7 +5,7 @@ num_epochs: 0
 grad_acc_step: 32
 l2: 0.1
 lr: 0.0003
-mode: "autoencoder"
+mode: "autoencodergen"
 load_model: True
 save_model:
   save: True
