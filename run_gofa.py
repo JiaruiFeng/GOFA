@@ -82,11 +82,11 @@ def main(params):
         train_task = GOFAPretrainTaskWrapper(task_names, root=params.data_root_path, save_name=save_names,
                                              fast_data_load=True, filter_func=filter_func)
 
-        val_tasks = GOFAPretrainTaskWrapper("cora", root=params.data_root_path,
+        val_tasks = GOFAPretrainTaskWrapper("cora", root=params.data_root_path, from_saved=False,
                                             split="val", sample_size=100, save_name="pretrain_val", pretrain_tasks=["CS", "CN", "SP"],
                                             num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
 
-        test_tasks = GOFAPretrainTaskWrapper("cora", root=params.data_root_path,
+        test_tasks = GOFAPretrainTaskWrapper("cora", root=params.data_root_path, from_saved=False,
                                             split="test", sample_size=100, save_name="pretrain_test", pretrain_tasks=["CS", "CN", "SP"],
                                             num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
 
