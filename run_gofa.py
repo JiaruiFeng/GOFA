@@ -67,12 +67,15 @@ def main(params):
         ######################################################################################################
         #                                          Pretrain Task                                             #
         ######################################################################################################
-        task_names = ["mag240m", "mag240m", "mag240m", "arxiv", "arxiv", "arxiv", "pubmed_node", "pubmed_node", "pubmed_node",
-                      "wiki_graph", "wiki_graph", "wiki_graph", "wikikg90m", "wikikg90m", "wikikg90m", "ultrachat200k"]
+        # task_names = ["mag240m", "mag240m", "mag240m", "arxiv", "arxiv", "arxiv", "pubmed_node", "pubmed_node", "pubmed_node",
+        #               "wiki_graph", "wiki_graph", "wiki_graph", "wikikg90m", "wikikg90m", "wikikg90m", "ultrachat200k"]
+        #
+        # save_names = ["pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_",
+        #               "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_",
+        #               "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_"]
 
-        save_names = ["pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_",
-                      "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_",
-                      "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_"]
+        task_names = ["pubmed_node"]
+        save_names = ["pretrain_"]
 
         filter_func = data_size_filter
         save_names = [name + str(params.last_epochs + 1) for name in save_names]
@@ -131,39 +134,31 @@ def main(params):
 
 
         n_steps = int(len(train_task) * params.num_epochs / (params.grad_acc_step * int(torch.cuda.device_count())))
-        val_tasks = GOFAPretrainTaskWrapper(["cora", "ultrachat200k"], root=params.data_root_path,
-                                            split="val", sample_size=100, save_name="pretrain_val",
-                                            num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
+        val_tasks = [GOFAFineTuneTaskWrapper(task_name,
+                                            root=params.data_root_path,
+                                            split="val",
+                                            hop=hop,
+                                            max_nodes_per_hop=max_nodes_per_hop,
+                                            sample_size=params.inf_sample_size_per_task,
+                                            num_workers=params.num_workers,
+                                            way=way,
+                                            instruction=instruct,
+                                            selections=selection) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
+                                            zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops,
+                                                params.inf_ways, params.inf_instructs, params.inf_selections)]
 
-        test_tasks = GOFAPretrainTaskWrapper(["cora", "ultrachat200k"], root=params.data_root_path,
-                                            split="test", sample_size=100, save_name="pretrain_test",
-                                            num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
-
-        # val_tasks = [GOFAFineTuneTaskWrapper(task_name,
-        #                                     root=params.data_root_path,
-        #                                     split="val",
-        #                                     hop=hop,
-        #                                     max_nodes_per_hop=max_nodes_per_hop,
-        #                                     sample_size=params.inf_sample_size_per_task,
-        #                                     num_workers=params.num_workers,
-        #                                     way=way,
-        #                                     instruction=instruct,
-        #                                     selections=selection) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
-        #                                     zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops,
-        #                                         params.inf_ways, params.inf_instructs, params.inf_selections)]
-        #
-        # test_tasks = [GOFAFineTuneTaskWrapper(task_name,
-        #                                     root=params.data_root_path,
-        #                                     split="test",
-        #                                     hop=hop,
-        #                                     max_nodes_per_hop=max_nodes_per_hop,
-        #                                     sample_size=params.inf_sample_size_per_task,
-        #                                     num_workers=params.num_workers,
-        #                                     way=way,
-        #                                     instruction=instruct,
-        #                                     selections=selection) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
-        #                                     zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops,
-        #                                         params.inf_ways, params.inf_instructs, params.inf_selections)]
+        test_tasks = [GOFAFineTuneTaskWrapper(task_name,
+                                            root=params.data_root_path,
+                                            split="test",
+                                            hop=hop,
+                                            max_nodes_per_hop=max_nodes_per_hop,
+                                            sample_size=params.inf_sample_size_per_task,
+                                            num_workers=params.num_workers,
+                                            way=way,
+                                            instruction=instruct,
+                                            selections=selection) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
+                                            zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops,
+                                                params.inf_ways, params.inf_instructs, params.inf_selections)]
 
         eval_metric_names, evaluators = get_evaluators(eval_tasks, task_types="QA")
         evlter = evaluators + evaluators
