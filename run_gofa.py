@@ -58,7 +58,7 @@ def main(params):
     def data_size_filter(data: TAGData, **kwargs):
         estimated_mem = 24.495 + 0.4645 * len(data.node_map) + 0.0042 * len(
             torch.unique(data.node_map)) + 0.1689 * len(data.edge_map) + 0.2846 * len(torch.unique(data.edge_map))
-        if len(data.node_map) + len(torch.unique(data.edge_map)) < 42 and estimated_mem < 70:
+        if len(data.node_map) + len(torch.unique(data.edge_map)) < 40 and estimated_mem < 65:
             return data
         else:
             return None
