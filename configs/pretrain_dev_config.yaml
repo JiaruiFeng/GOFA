@@ -1,5 +1,5 @@
 ckpt_path:
-load_dir: "./cache_data/best_ckpt.pth"
+load_dir: "./best_ckpt.pth"
 last_epochs: 0
 num_epochs: 0
 grad_acc_step: 32
