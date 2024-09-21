@@ -25,8 +25,6 @@ from TAGLAS.data import TAGData
 import torch
 from types import SimpleNamespace
 
-import os
-os.environ['CUDA_VISIBLE_DEVICES'] = "2"
 
 def main(params):
     if params.base_llm == 'llama7b':
