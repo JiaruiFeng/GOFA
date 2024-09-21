@@ -75,7 +75,7 @@ def main(params):
                       "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_"]
 
         filter_func = data_size_filter
-        save_names = [name + str(params.last_epochs) for name in save_names]
+        save_names = [name + str(params.last_epochs + 1) for name in save_names]
         train_task = GOFAPretrainTaskWrapper(task_names, root=params.data_root_path, save_name=save_names,
                                              fast_data_load=True, filter_func=filter_func)
 
