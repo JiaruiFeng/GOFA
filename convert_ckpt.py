@@ -3,11 +3,10 @@ from collections import OrderedDict
 import torch
 
 def convert_ckpt(load_dir, save_path):
-    prefix = "_forward_module.model.llm_model.model.icae.base_model.model.model.g_layers."
+    prefix = "model.llm_model.model.icae.base_model.model.model.g_layers"
     state_dict = get_fp32_state_dict_from_zero_checkpoint(load_dir)
     partial_dict = OrderedDict()
     for s in state_dict:
-        print(s)
         if s.startswith(prefix):
             partial_dict[s[len(prefix):]] = state_dict[s]
 
