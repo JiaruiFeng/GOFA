@@ -14,9 +14,9 @@ def convert_ckpt(load_dir, save_path):
 
 
 if __name__ == "__main__":
-    load_dir_list = ["saved_exp/2024-09-21\ 08:31:21.655169_125/GOFA/qp3rxlqu/checkpoints/best_ckptepoch=0-step=1038.ckpt",
-                     "saved_exp/2024-09-21\ 08:31:21.655169_125/GOFA/qp3rxlqu/checkpoints/best_ckptepoch=0-step=2071.ckpt",
-                     "saved_exp/2024-09-21\ 08:31:21.655169_125/GOFA/qp3rxlqu/checkpoints/best_ckptepoch=0-step=3107.ckpt",]
+    load_dir_list = ["saved_exp/2024-09-21 08:31:21.655169_125/GOFA/qp3rxlqu/checkpoints/best_ckptepoch=0-step=1038.ckpt",
+                     "saved_exp/2024-09-21 08:31:21.655169_125/GOFA/qp3rxlqu/checkpoints/best_ckptepoch=0-step=2071.ckpt",
+                     "saved_exp/2024-09-21 08:31:21.655169_125/GOFA/qp3rxlqu/checkpoints/best_ckptepoch=0-step=3107.ckpt",]
 
     save_path_list = ["cache_data/mem_ckpt_2_1038.pth",
                       "cache_data/mem_ckpt_2_2071.pth",
