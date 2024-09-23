@@ -7,6 +7,7 @@ def convert_ckpt(load_dir, save_path):
     state_dict = get_fp32_state_dict_from_zero_checkpoint(load_dir)
     partial_dict = OrderedDict()
     for s in state_dict:
+        print(s)
         if s.startswith(prefix):
             partial_dict[s[len(prefix):]] = state_dict[s]
 
