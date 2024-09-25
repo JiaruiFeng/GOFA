@@ -1,7 +1,9 @@
+root_path: "./"
 data_root_path: "/storage1/yinjie.tang/Active/feng.jiarui/TAGDataset"
 load_dir:
-ckpt_path:
-last_epochs: 0
+ckpt_path: "/storage1/yinjie.tang/Active/jerry.kong/gofa_saved_exp/2024-09-16_02:25:46.419638_003/last.ckpt"
+ckpt_save_path: "/storage1/yinjie.tang/Active/jerry.kong/gofa_saved_exp"
+last_epochs: 1
 num_epochs: 1
 grad_acc_step: 32
 l2: 0.1
