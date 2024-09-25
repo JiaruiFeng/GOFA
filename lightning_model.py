@@ -82,6 +82,15 @@ class GraphTextPredLightning(BaseTemplate):
                 raise e
         return loss
 
+    def on_validation_epoch_start(self) -> None:
+        super().on_validation_epoch_start()
+        self.old_decode = self.model.decode
+        self.model.decode = self.model.generate
+
+    def on_validation_epoch_end(self):
+        super().on_validation_epoch_end()
+        self.model.decode = self.old_decode
+
     #
     #
     # def optimizer_step(
