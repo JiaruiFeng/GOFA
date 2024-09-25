@@ -311,6 +311,7 @@ def setup_exp(params):
     curtime = datetime.now()
     exp_dir = osp.join(target_path, str(curtime))
     exp_dir = exp_dir + "_{val:03d}".format(val=random.randint(0, 1000))
+    exp_dir = exp_dir.replace(" ", "_")
     os.mkdir(exp_dir)
     with open(osp.join(exp_dir, "command"), "w") as f:
         yaml.dump(params, f)

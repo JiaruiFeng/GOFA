@@ -42,6 +42,9 @@ def main(params):
                                save_dir=params.exp_dir, offline=params.offline_log, )
     print("available devices: ", torch.cuda.device_count())
     checkpoint_dir = os.path.join(params.exp_dir, params.log_project)
+    if params.ckpt_save_path is not None:
+        date = params.exp_dir.split("/")[-1]
+        params.ckpt_save_path = params.ckpt_save_path+"/" + date
     params_dict = vars(params)
     wandb_logger.log_table(key="hparams", columns=list(params_dict.keys()), data=[list(params_dict.values())])
     model_args, training_args, gofa_args = ModelArguments(), TrainingArguments(), gofa_config(
@@ -73,9 +76,6 @@ def main(params):
         save_names = ["pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_",
                       "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_",
                       "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_"]
-
-        # task_names = ["pubmed_node"]
-        # save_names = ["pretrain_"]
 
         filter_func = data_size_filter
         save_names = [name + str(params.last_epochs + 1) for name in save_names]
@@ -130,7 +130,9 @@ def main(params):
                                             way=params.ways,
                                             num_workers=params.num_workers,
                                             instruction=params.instructs,
-                                            selection=params.selections)
+                                            selection=params.selections,
+                                            save_data=True,
+                                            from_saved=True,)
 
 
         n_steps = int(len(train_task) * params.num_epochs / (params.grad_acc_step * int(torch.cuda.device_count())))
@@ -143,7 +145,8 @@ def main(params):
                                             num_workers=params.num_workers,
                                             way=way,
                                             instruction=instruct,
-                                            selections=selection) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
+                                            selections=selection,save_data=True,
+                                            from_saved=True,) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
                                             zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops,
                                                 params.inf_ways, params.inf_instructs, params.inf_selections)]
 
@@ -156,7 +159,8 @@ def main(params):
                                             num_workers=params.num_workers,
                                             way=way,
                                             instruction=instruct,
-                                            selections=selection) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
+                                            selections=selection,save_data=True,
+                                            from_saved=True) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
                                             zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops,
                                                 params.inf_ways, params.inf_instructs, params.inf_selections)]
 
@@ -247,7 +251,7 @@ def main(params):
                                           reload_freq=1, test_rep=params.test_rep, val_interval=params.val_interval,
                                           grad_clipping=params.grad_clip, grad_acc_step=params.grad_acc_step,
                                           save_time=timedelta(hours=params.save_model["time"]), cktp_prefix="best_ckpt",
-                                          precision=params.training_precision, top_k=params.save_model["top_k"], ckpt_path=params.ckpt_path, save_last=params.save_model["last"])
+                                          precision=params.training_precision, top_k=params.save_model["top_k"], ckpt_path=params.ckpt_path, save_last=params.save_model["last"], ckpt_save_path=params.ckpt_save_path)
     if params.last_save:
         model.save_partial(os.path.join(params.exp_dir, "best_ckpt.pth"))
 
