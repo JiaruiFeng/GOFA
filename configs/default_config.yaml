@@ -2,10 +2,11 @@ root_path:
 data_root_path: "./TAGDataset"
 llama_pretrain_checkpoint: "../cache_data/cache_data/model/llama-2-7b-chat-finetuned-icae_zeroweight_llama2.pt"
 mistral_pretrain_checkpoint: "./cache_data/model/mistral_7b_ft_icae.safetensors"
+ckpt_save_path:
 num_bases: 4
 emb_dim: 1024
 num_layers: 6
-mlp_type: "llama"
+mlp_type: "gp"
 dropout: 0.0
 JK: "last"
 lr: 0.0003
@@ -31,7 +32,7 @@ llm_name: "icae"
 base_llm: "mistral7b"
 llm_max_length: 128
 llm_b_size: 1
-val_interval: 1
+val_interval:
 load_texts: True
 mode: "autoencoder"
 temp: 0.1

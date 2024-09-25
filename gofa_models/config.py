@@ -16,6 +16,7 @@ class GOFALlamaConfig(LlamaConfig):
         self.llama_dtype = llama_dtype
         self.gnn_hidden_act = gnn_hidden_act
         self.gnn_mlp_type = gnn_mlp_type
+        self.pretraining_tp = 0
 
 
 
@@ -32,3 +33,4 @@ class GOFAMistralConfig(MistralConfig):
         self.llama_dtype = llama_dtype
         self.gnn_hidden_act = gnn_hidden_act
         self.gnn_mlp_type = gnn_mlp_type
+        self.pretraining_tp = 0

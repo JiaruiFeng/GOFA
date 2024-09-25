@@ -42,6 +42,9 @@ def main(params):
                                save_dir=params.exp_dir, offline=params.offline_log, )
     print("available devices: ", torch.cuda.device_count())
     checkpoint_dir = os.path.join(params.exp_dir, params.log_project)
+    if params.ckpt_save_path is not None:
+        date = params.exp_dir.split("/")[-1]
+        params.ckpt_save_path = params.ckpt_save_path+"/" + date
     params_dict = vars(params)
     wandb_logger.log_table(key="hparams", columns=list(params_dict.keys()), data=[list(params_dict.values())])
     model_args, training_args, gofa_args = ModelArguments(), TrainingArguments(), gofa_config(
@@ -63,12 +66,20 @@ def main(params):
         task_names = ["mag240m", "mag240m", "mag240m", "arxiv", "arxiv", "arxiv", "pubmed_node", "pubmed_node", "pubmed_node",
                       "wiki_graph", "wiki_graph", "wiki_graph", "wikikg90m", "wikikg90m", "wikikg90m", "ultrachat200k"]
 
-        save_names = ["pretrain_", "pretrain_IR_kc_", "pertrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pertrain_IR_ck_",
-                      "pretrain_", "pretrain_IR_kc_", "pertrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pertrain_IR_ck_",
-                      "pretrain_", "pretrain_IR_kc_", "pertrain_IR_ck_", "pretrain_"]
+        save_names = ["pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_",
+                      "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_",
+                      "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_"]
+
+        def data_size_filter(data: TAGData, **kwargs):
+            estimated_mem = 24.495 + 0.4645 * len(data.node_map) + 0.0042 * len(
+                torch.unique(data.node_map)) + 0.1689 * len(data.edge_map) + 0.2846 * len(torch.unique(data.edge_map))
+            if len(data.node_map) + len(torch.unique(data.edge_map)) < 40 and estimated_mem < 65:
+                return data
+            else:
+                return None
 
         save_names = [name + str(params.last_epochs) for name in save_names]
-        train_task = GOFAPretrainTaskWrapper(task_names, root=params.data_root_path, save_name=save_names, fast_data_load=True)
+        train_task = GOFAPretrainTaskWrapper(task_names, root=params.data_root_path, save_name=save_names, fast_data_load=True, filter_func=data_size_filter)
 
         val_tasks = GOFAPretrainTaskWrapper(["cora", "ultrachat200k"], root=params.data_root_path,
                                             split="val", sample_size=100, save_name="pretrain_val",
@@ -125,7 +136,9 @@ def main(params):
                                             way=params.ways,
                                             num_workers=params.num_workers,
                                             instruction=params.instructs,
-                                            selection=params.selections)
+                                            selection=params.selections,
+                                            save_data=True,
+                                            from_saved=True,)
 
 
         n_steps = int(len(train_task) * params.num_epochs / (params.grad_acc_step * int(torch.cuda.device_count())))
@@ -138,7 +151,8 @@ def main(params):
                                             num_workers=params.num_workers,
                                             way=way,
                                             instruction=instruct,
-                                            selections=selection) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
+                                            selections=selection,save_data=True,
+                                            from_saved=True,) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
                                             zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops,
                                                 params.inf_ways, params.inf_instructs, params.inf_selections)]
 
@@ -151,7 +165,8 @@ def main(params):
                                             num_workers=params.num_workers,
                                             way=way,
                                             instruction=instruct,
-                                            selections=selection) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
+                                            selections=selection,save_data=True,
+                                            from_saved=True) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
                                             zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops,
                                                 params.inf_ways, params.inf_instructs, params.inf_selections)]
 
@@ -243,7 +258,7 @@ def main(params):
                                           reload_freq=1, test_rep=params.test_rep, val_interval=params.val_interval,
                                           grad_clipping=params.grad_clip, grad_acc_step=params.grad_acc_step,
                                           save_time=timedelta(hours=params.save_model["time"]), cktp_prefix="best_ckpt",
-                                          precision=params.training_precision, top_k=params.save_model["top_k"], ckpt_path=params.ckpt_path, save_last=params.save_model["last"])
+                                          precision=params.training_precision, top_k=params.save_model["top_k"], ckpt_path=params.ckpt_path, save_last=params.save_model["last"], ckpt_save_path=params.ckpt_save_path)
     if params.last_save:
         model.save_partial(os.path.join(params.exp_dir, "best_ckpt.pth"))
 

@@ -23,7 +23,8 @@ def lightning_fit(
     accelerator="auto",
     detect_anomaly=False,
     reload_freq=0,
-    val_interval=1,
+    val_interval=None,
+    check_n_epoch=1,
     strategy=None,
     grad_acc_step=1,
     grad_clipping=None,
@@ -34,17 +35,18 @@ def lightning_fit(
     top_k=1,
     ckpt_path=None,
     save_last=False,
+    ckpt_save_path=None,
 ):
     callbacks = []
     if prog_bar:
         callbacks.append(TQDMProgressBar(refresh_rate=20))
     if save_model:
         if save_epoch is not None:
-            callbacks.append(ModelCheckpoint(monitor=metrics.val_metric, mode=metrics.eval_mode, save_last=True,
+            callbacks.append(ModelCheckpoint(dirpath=ckpt_save_path, monitor=metrics.val_metric, mode=metrics.eval_mode, save_last=True,
                 filename=cktp_prefix + "{epoch}-{step}", every_n_epochs=save_epoch, ))
         else:
             callbacks.append(
-                ModelCheckpoint(save_last=save_last, filename=cktp_prefix + "{epoch}-{step}", train_time_interval=save_time,
+                ModelCheckpoint(dirpath=ckpt_save_path, save_last=save_last, filename=cktp_prefix + "{epoch}-{step}", train_time_interval=save_time,
                     every_n_epochs=save_epoch, every_n_train_steps=save_step, save_top_k=top_k))
 
     trainer = Trainer(
@@ -61,9 +63,9 @@ def lightning_fit(
         enable_progress_bar=prog_bar,
         detect_anomaly=detect_anomaly,
         reload_dataloaders_every_n_epochs=reload_freq,
-        check_val_every_n_epoch=val_interval, num_sanity_val_steps=1,
+        check_val_every_n_epoch=check_n_epoch, num_sanity_val_steps=1,
         gradient_clip_val=grad_clipping,
-        accumulate_grad_batches=grad_acc_step,
+        accumulate_grad_batches=grad_acc_step, val_check_interval=val_interval
     )
     trainer.fit(model, datamodule=data_module, ckpt_path=ckpt_path)
     if load_best:
