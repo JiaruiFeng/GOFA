@@ -1,11 +1,6 @@
 run_mode: "ft"
 load_model: True
-load_dir: "/storage1/christopherking/Active/jerry.kong/saved_exp/2024-08-21 16:08:39.060649_656/mem_ckpt.pth"
-#load_dir: "/storage1/christopherking/Active/jerry.kong/saved_exp/2024-08-24 02:11:49.665052_351/best_ckpt.pth"
-#load_dir: "/storage1/christopherking/Active/jerry.kong/saved_exp/2024-08-24 11:45:59.507954_049/best_ckpt.pth"
-#load_dir: "/storage1/christopherking/Active/jerry.kong/saved_exp/2024-08-25 01:53:47.943422_368/best_ckpt.pth"
-#load_dir: "/storage1/christopherking/Active/jerry.kong/saved_exp/2024-08-26 00:00:18.003550_592/best_ckpt.pth"
-#load_dir: "/storage1/christopherking/Active/jerry.kong/saved_exp/2024-09-10 17:21:46.136630_953/best_ckpt.pth" #link
+load_dir: "mem_ckpt.pth"
 grad_acc_step: 32
 last_epochs: 0
 num_epochs: 1

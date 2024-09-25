@@ -1,11 +1,17 @@
 import os
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, Union, Callable
 
 import numpy as np
 
 from gp.lightning.module_template import BaseTemplate
 import torch
-
+from lightning.pytorch.core.optimizer import LightningOptimizer
+from torch.optim import Optimizer
+# from dataclasses import dataclass, field
+# from torch import Tensor
+# import traceback
+# from lightning.pytorch.loops.optimization.automatic import Closure
+# from functools import partial
 
 class GraphPredLightning(BaseTemplate):
     def forward(self, batch):
@@ -42,6 +48,15 @@ class GraphTextPredLightning(BaseTemplate):
 
     def on_train_batch_start(self, batch: Any, batch_idx: int) -> Optional[int]:
         # self.model.llm_model.train_mode()
+        # num_nodes = len(batch.node_map)
+        # num_edges = len(batch.edge_map)
+        # num_node_text = len(batch.x)
+        # num_edge_text = len(batch.edge_attr)
+        # memory = torch.cuda.max_memory_allocated() / 1024 ** 3
+        # data = [str(num_nodes), str(num_edges), str(num_node_text), str(num_edge_text), str(memory)]
+        # with open("test_memory.csv", "a") as file:
+        #     file.write(",".join(data) + "\n")
+        # torch.cuda.empty_cache()
         pass
 
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]) -> None:
@@ -66,3 +81,29 @@ class GraphTextPredLightning(BaseTemplate):
             else:
                 raise e
         return loss
+
+    #
+    #
+    # def optimizer_step(
+    #     self,
+    #     epoch: int,
+    #     batch_idx: int,
+    #     optimizer: Union[Optimizer, LightningOptimizer],
+    #     optimizer_closure: Optional[Callable[[], Any]] = None,
+    # ) -> None:
+    #     try:
+    #         output = optimizer_closure()
+    #         def dummy_closure():
+    #             return output
+    #         optimizer.step(dummy_closure)
+    #     except Exception as e:
+    #         if "out of memory" in str(e):
+    #             print("Ignoring optimizer OOM batch")
+    #             print(traceback.format_exc())
+    #             make_dummy_batch(optimizer_closure._step_fn.args[0]["batch"])
+    #             output = optimizer_closure()
+    #             def dummy_closure():
+    #                 return output
+    #             optimizer.step(dummy_closure)
+    #         else:
+    #             raise e

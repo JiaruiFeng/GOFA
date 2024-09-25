@@ -1,8 +1,8 @@
-run_mode: "pretrain"
+run_mode: "inf"
 num_epochs: 0
 offline_log: False
-mode: autoencoder
-load_dir: "/project/tantra/jerry.kong/repo/OFAv2/mistral_qamag03_best_ckpt.pth"
+mode: autoencodergen
+load_dir: "mem_ckpt.pth"
 base_llm: "mistral7b"
 load_model: True
 last_save: False

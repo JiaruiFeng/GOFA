@@ -58,6 +58,13 @@ def main(params):
         gofa_args.llama_dtype = torch.bfloat16
     gofa_args.gnn_mlp_type = params.mlp_type
 
+    def data_size_filter(data: TAGData, **kwargs):
+        estimated_mem = 24.495 + 0.4645 * len(data.node_map) + 0.0042 * len(
+            torch.unique(data.node_map)) + 0.1689 * len(data.edge_map) + 0.2846 * len(torch.unique(data.edge_map))
+        if len(data.node_map) + len(torch.unique(data.edge_map)) < 40 and estimated_mem < 65:
+            return data
+        else:
+            return None
 
     if params.run_mode == "pretrain":
         ######################################################################################################
@@ -70,23 +77,17 @@ def main(params):
                       "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_",
                       "pretrain_", "pretrain_IR_kc_", "pretrain_IR_ck_", "pretrain_"]
 
-        def data_size_filter(data: TAGData, **kwargs):
-            estimated_mem = 24.495 + 0.4645 * len(data.node_map) + 0.0042 * len(
-                torch.unique(data.node_map)) + 0.1689 * len(data.edge_map) + 0.2846 * len(torch.unique(data.edge_map))
-            if len(data.node_map) + len(torch.unique(data.edge_map)) < 40 and estimated_mem < 65:
-                return data
-            else:
-                return None
+        filter_func = data_size_filter
+        save_names = [name + str(params.last_epochs + 1) for name in save_names]
+        train_task = GOFAPretrainTaskWrapper(task_names, root=params.data_root_path, save_name=save_names,
+                                             fast_data_load=True, filter_func=filter_func)
 
-        save_names = [name + str(params.last_epochs) for name in save_names]
-        train_task = GOFAPretrainTaskWrapper(task_names, root=params.data_root_path, save_name=save_names, fast_data_load=True, filter_func=data_size_filter)
-
-        val_tasks = GOFAPretrainTaskWrapper(["cora", "ultrachat200k"], root=params.data_root_path,
-                                            split="val", sample_size=100, save_name="pretrain_val",
+        val_tasks = GOFAPretrainTaskWrapper("cora", root=params.data_root_path,
+                                            split="val", sample_size=100, save_name="pretrain_val", pretrain_tasks=["CS", "CN", "SP"],
                                             num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
 
-        test_tasks = GOFAPretrainTaskWrapper(["cora", "ultrachat200k"], root=params.data_root_path,
-                                            split="test", sample_size=100, save_name="pretrain_test",
+        test_tasks = GOFAPretrainTaskWrapper("cora", root=params.data_root_path,
+                                            split="test", sample_size=100, save_name="pretrain_test", pretrain_tasks=["CS", "CN", "SP"],
                                             num_workers=params.num_workers, num_additional_sentences=3, num_SP=3, num_CN=3)
 
         n_steps = int(len(train_task) * params.num_epochs / (params.grad_acc_step * int(torch.cuda.device_count())))
@@ -111,20 +112,13 @@ def main(params):
             ######################################################################################################
             #                                          FINETUNE Task                                             #
             ######################################################################################################
-            def data_size_filter(data: TAGData, **kwargs):
-                estimated_mem = 24.495 + 0.4645 * len(data.node_map) + 0.0042 * len(
-                    torch.unique(data.node_map)) + 0.1689 * len(data.edge_map) + 0.2846 * len(torch.unique(data.edge_map))
-                if len(data.node_map)+len(torch.unique(data.edge_map)) < 42 and estimated_mem < 70:
-                    return data
-                else:
-                    return None
+            filter_func = data_size_filter
+
         else:
             ######################################################################################################
             #                                          Inference                                                 #
             ######################################################################################################
-            def data_size_filter(data: TAGData, **kwargs):
-                return data
-
+            filter_func = lambda x:x
 
         train_task = GOFAFineTuneTaskWrapper(train_tasks,
                                             root=params.data_root_path,
@@ -132,7 +126,7 @@ def main(params):
                                             hop=params.hops,
                                             max_nodes_per_hop=params.train_max_nodes_per_hops,
                                             sample_size=params.sample_size_per_task,
-                                            filter_func=data_size_filter,
+                                            filter_func=filter_func,
                                             way=params.ways,
                                             num_workers=params.num_workers,
                                             instruction=params.instructs,
@@ -247,7 +241,6 @@ def main(params):
             model.load_partial(state_dict=partial_dict)
         else:
             model.load_partial(load_dir=params.load_dir)
-
     strategy = "deepspeed_stage_2" if torch.cuda.device_count() > 1 else "auto"
 
     if params.run_mode == "inf":

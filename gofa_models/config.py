@@ -5,7 +5,7 @@ from transformers import LlamaConfig, MistralConfig
 
 class GOFALlamaConfig(LlamaConfig):
     def __init__(self, dim=4096, num_layers=6, mem_token=128, head=8, add_self_loops=True, dropout=0.0,
-                 llama_dtype=torch.float16, gnn_hidden_act="relu", gnn_mlp_type="gp", **kwargs):
+                 llama_dtype=torch.float16, gnn_hidden_act="relu", gnn_mlp_type="gp", pretraining_tp=0, **kwargs):
         super().__init__(**kwargs)
         self.dim = dim
         self.mem_token = mem_token
@@ -16,13 +16,14 @@ class GOFALlamaConfig(LlamaConfig):
         self.llama_dtype = llama_dtype
         self.gnn_hidden_act = gnn_hidden_act
         self.gnn_mlp_type = gnn_mlp_type
-        self.pretraining_tp = 0
+        self.pretraining_tp = pretraining_tp
+
 
 
 
 class GOFAMistralConfig(MistralConfig):
     def __init__(self, dim=4096, num_layer=6, mem_token=128, head=8, add_self_loops=True, dropout=0.0,
-                 llama_dtype=torch.float16, gnn_hidden_act="relu", gnn_mlp_type="gp", **kwargs):
+                 llama_dtype=torch.float16, gnn_hidden_act="relu", gnn_mlp_type="gp",  pretraining_tp=0, **kwargs):
         super().__init__(**kwargs)
         self.dim = dim
         self.mem_token = mem_token
@@ -33,4 +34,4 @@ class GOFAMistralConfig(MistralConfig):
         self.llama_dtype = llama_dtype
         self.gnn_hidden_act = gnn_hidden_act
         self.gnn_mlp_type = gnn_mlp_type
-        self.pretraining_tp = 0
+        self.pretraining_tp = pretraining_tp

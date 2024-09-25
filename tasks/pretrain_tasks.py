@@ -11,6 +11,17 @@ import torch
 import numpy as np
 from .pretrain_task_base import get_pretrain_task
 
+def create_dummy_data():
+    edge_index = torch.tensor([[0, 1], [1, 0]], dtype=torch.long)
+    node_map = torch.zeros(2, dtype=torch.long)
+    edge_map = torch.zeros(2, dtype=torch.long)
+    target_index = [[0]]
+    question_list = ["What's your name?"]
+    answer_list = ["GOFA"]
+    label_list = ["GOFA"]
+    return TAGData(edge_index=edge_index, node_map=node_map, edge_map=edge_map, target_index=target_index,
+            question=question_list, answer=answer_list, label=label_list)
+
 
 class GOFAGraphPretrainTask(GQATask):
     r"""GOFA graph-level pretrain task class.
@@ -38,6 +49,8 @@ class GOFAGraphPretrainTask(GQATask):
     ):
         index = value_to_tensor(index)
         edge_index, node_map, edge_map = self.__process_graph__(index, edge_index, node_map, edge_map)
+        if len(node_map) < 2:
+            return create_dummy_data()
         target_index = torch.arange(len(node_map))
 
         question_list = []
@@ -164,6 +177,8 @@ class GOFANodePretrainTask(NQATask):
     ):
         index = value_to_tensor(index)
         edge_index, node_map, edge_map, target_index = self.__process_graph__(index, edge_index, node_map, edge_map)
+        if len(node_map) < 2:
+            return create_dummy_data()
         target_index = value_to_tensor(target_index)
 
         question_list = []
@@ -281,6 +296,8 @@ class GOFALinkPretrainTask(LQATask):
     ):
         index = value_to_tensor(index)
         edge_index, node_map, edge_map, target_index = self.__process_graph__(index, edge_index, node_map, edge_map)
+        if len(node_map) < 2:
+            return create_dummy_data()
         target_index = value_to_tensor(target_index)
 
         question_list = []

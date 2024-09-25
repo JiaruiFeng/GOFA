@@ -237,7 +237,7 @@ def generate_wikikg90m(epoch):
     num_LP = 2
     hop = 3
     num_nodes_per_hop = 5
-    num_workers = 32
+    num_workers = 64
     split = "train"
     node_task_save_name = "_".join([SAVE_NAME_BASE, str(epoch)])
     key_to_content_task_save_name = "_".join([SAVE_NAME_BASE, "IR_kc", str(epoch)])
@@ -250,11 +250,11 @@ def generate_wikikg90m(epoch):
 
 if __name__ == "__main__":
     #sample_datasets = ["mag240m", "arxiv", "wiki_graph", "pubmed_node", "ultrachat200k", "wikikg90m"]
-    sample_datasets = ["mag240m", "arxiv", "pubmed_node"]
+    # sample_datasets = ["mag240m", "arxiv", "pubmed_node"]
     # sample_datasets = ["wikikg90m"]
-    sample_datasets = ["wiki_graph"]
-    SAMPLE_EPOCH = 3
-    START_EPOCH = 0
+    sample_datasets = ["wikikg90m"]
+    SAMPLE_EPOCH = 2
+    START_EPOCH = 1
     def random_seed(length):
         random.seed()
         min = 10 ** (length - 1)
