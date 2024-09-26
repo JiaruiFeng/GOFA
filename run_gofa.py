@@ -133,7 +133,8 @@ def main(params):
                                             instruction=params.instructs,
                                             selection=params.selections,
                                             save_data=True,
-                                            from_saved=True,)
+                                            from_saved=True,
+                                            fast_data_load=True,)
 
 
         n_steps = int(len(train_task) * params.num_epochs / (params.grad_acc_step * int(torch.cuda.device_count())))
