@@ -123,6 +123,7 @@ def main(params):
         train_task = GOFAFineTuneTaskWrapper(train_tasks,
                                             root=params.data_root_path,
                                             split="train",
+                                            save_name="ft_0",
                                             hop=params.hops,
                                             max_nodes_per_hop=params.train_max_nodes_per_hops,
                                             sample_size=params.sample_size_per_task,

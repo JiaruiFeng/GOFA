@@ -339,3 +339,21 @@ def wikikg90m_prompt(data, task_class, selection=True, way=-1, instruction=True,
 
     data.question = graph_description + instruction_prompt + question + selection_prompt
     return data
+
+
+def arxiv_link_prompt(data, task_class, instruction=True, **kwargs):
+    question = data.question
+    graph_description = task_class.dataset.graph_description
+    if instruction:
+        instruction_prompt = (f"You are a computer science expert tasked with determining whether two given papers "
+                              f"[NODE_INDEX {data.target_index[0].item()}] and [NODE_INDEX {data.target_index[1].item()}] "
+                              f"in the computer science domain has citation relationship based on their content and"
+                              f" network characteristics. If two papers are from the same category, the content of the "
+                              f"two papers is similar, the shortest path distance between the two papers is small, or "
+                              f"the papers have a large number of common neighbors in the citation network, choose Yes. "
+                              f"If two papers are different, the shortest path distance between the two papers is large,"
+                              f" or the papers do not have many common neighbors in the citation network, choose No. ")
+    else:
+        instruction_prompt = ""
+    data.question = graph_description + instruction_prompt + question
+    return data

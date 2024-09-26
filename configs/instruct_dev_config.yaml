@@ -8,20 +8,26 @@ mode: autoencoder
 batch_size: 1
 lr: 0.0001
 l2: 0.0
-selections: True
 llm_max_length: 256
 
 train_task_names:
+  - mag240m
+  - wikikg90m
   - arxiv_link
   - arxiv
   - pubmed_node
   - pubmed_link
+
 sample_size_per_task:
-  - 80000
+  - 100000
+  - 100000
   - 40000
-  - 10000
-  - 40000
+  - 50000
+  - 5000
+  - 5000
 hops:
+  - 3
+  - 3
   - 3
   - 3
   - 3
@@ -32,8 +38,11 @@ train_max_nodes_per_hops:
   - 5
   - 5
   - 5
+  - 5
+  - 5
 ways: 10
 instructs: True
+selections: True
 
 eval_task_names:
 #  - cora_node
