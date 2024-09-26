@@ -72,7 +72,7 @@ eval_task_names:
   - fb15k237
   - ml1m
   - products
-inf_sample_size_per_task: 20
+inf_sample_size_per_task: 500
 inf_hops:
   - 3
   - 3
