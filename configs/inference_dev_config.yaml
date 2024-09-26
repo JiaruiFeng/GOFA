@@ -2,7 +2,7 @@ run_mode: "inf"
 num_epochs: 0
 offline_log: False
 mode: autoencodergen
-load_dir: "mem_ckpt.pth"
+load_dir: "/workspace/GOFA/saved_exp/2024-09-26_00:13:58.388633_395/best_ckpt.pth"
 base_llm: "mistral7b"
 load_model: True
 last_save: False
@@ -15,27 +15,29 @@ train_task_names:
   - cora_node
 hops: 3
 train_max_nodes_per_hops: 5
-ways: 40
+ways: -1
 instructs: True
 selections: True
 
-
 eval_task_names:
-  - cora_node
-inf_sample_size_per_task: 1.0
-inf_hops:
-  - 3
+  - ml1m
 
+inf_sample_size_per_task:
+  - 15000
+
+inf_hops:
+  - 1
 
 inf_max_nodes_per_hops:
-  - 10
+  - 15
+
 
 inf_ways:
   - -1
 
 inf_instructs:
-  - True
+  - False
+
 
 inf_selections:
-  - True
-
+  - False
