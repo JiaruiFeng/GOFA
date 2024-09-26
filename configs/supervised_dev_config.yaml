@@ -2,7 +2,7 @@ run_mode: "ft"
 load_model: True
 load_dir: "./cache_data/best_ckpt_3.pth"
 last_epochs: 0
-num_epochs: 1
+num_epochs: 0
 mode: "autoencoder"
 batch_size: 1
 lr: 0.0001
@@ -61,76 +61,114 @@ ways: -1
 selections: False
 instructs: False
 
+
 eval_task_names:
-  - arxiv
-  - cora_node
-  - cora_link
-  - pubmed_node
-  - pubmed_link
-  - wikics
-  - wn18rr
-  - fb15k237
   - ml1m
-  - products
-inf_sample_size_per_task: 500
+
+inf_sample_size_per_task:
+  - 15000
+
 inf_hops:
-  - 3
-  - 3
-  - 3
-  - 3
-  - 3
-  - 3
-  - 3
-  - 3
-  - 1
   - 3
 
 inf_max_nodes_per_hops:
   - 5
-  - 5
-  - 5
-  - 5
-  - 5
-  - 5
-  - 5
-  - 5
-  - 15
-  - 5
+
 
 inf_ways:
   - -1
-  - -1
-  - -1
-  - -1
-  - -1
-  - -1
-  - -1
-  - -1
-  - -1
-  - -1
+
 
 inf_instructs:
   - False
-  - False
-  - False
-  - False
-  - False
-  - False
-  - False
-  - False
-  - False
-  - False
+
 
 inf_selections:
   - False
-  - False
-  - False
-  - False
-  - False
-  - False
-  - False
-  - False
-  - False
-  - False
+
+
+
+#
+#eval_task_names:
+#  - arxiv
+#  - cora_node
+#  - cora_link
+#  - pubmed_node
+#  - pubmed_link
+#  - wikics
+#  - wn18rr
+#  - fb15k237
+#  - ml1m
+#  - products
+#inf_sample_size_per_task:
+#  - 15000
+#  - 1.0
+#  - 1.0
+#  - 15000
+#  - 15000
+#  - 1.0
+#  - 1.0
+#  - 15000
+#  - 15000
+#  - 15000
+#inf_hops:
+#  - 3
+#  - 3
+#  - 3
+#  - 3
+#  - 3
+#  - 3
+#  - 3
+#  - 3
+#  - 1
+#  - 3
+#
+#inf_max_nodes_per_hops:
+#  - 5
+#  - 5
+#  - 5
+#  - 5
+#  - 5
+#  - 5
+#  - 5
+#  - 5
+#  - 15
+#  - 5
+#
+#inf_ways:
+#  - -1
+#  - -1
+#  - -1
+#  - -1
+#  - -1
+#  - -1
+#  - -1
+#  - -1
+#  - -1
+#  - -1
+#
+#inf_instructs:
+#  - False
+#  - False
+#  - False
+#  - False
+#  - False
+#  - False
+#  - False
+#  - False
+#  - False
+#  - False
+#
+#inf_selections:
+#  - False
+#  - False
+#  - False
+#  - False
+#  - False
+#  - False
+#  - False
+#  - False
+#  - False
+#  - False
 
 dec_lora: True

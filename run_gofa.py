@@ -143,7 +143,7 @@ def main(params):
                                             split="val",
                                             hop=hop,
                                             max_nodes_per_hop=max_nodes_per_hop,
-                                            sample_size=params.inf_sample_size_per_task,
+                                            sample_size=10,
                                             num_workers=params.num_workers,
                                             way=way,
                                             instruction=instruct,
@@ -157,14 +157,14 @@ def main(params):
                                             split="test",
                                             hop=hop,
                                             max_nodes_per_hop=max_nodes_per_hop,
-                                            sample_size=params.inf_sample_size_per_task,
+                                            sample_size=inf_sample_size,
                                             num_workers=params.num_workers,
                                             way=way,
                                             instruction=instruct,
                                             selection=selection,save_data=True,
-                                            from_saved=False) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
+                                            from_saved=False) for task_name, hop, max_nodes_per_hop, way, instruct, selection, inf_sample_size in
                                             zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops,
-                                                params.inf_ways, params.inf_instructs, params.inf_selections)]
+                                                params.inf_ways, params.inf_instructs, params.inf_selections, params.inf_sample_size_per_task)]
 
         eval_metric_names, evaluators = get_evaluators(eval_tasks, task_types="QA")
         evlter = evaluators + evaluators
