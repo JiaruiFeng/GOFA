@@ -9,7 +9,7 @@ lr: 0.0001
 l2: 0.1
 train_data_multiples: 1.0
 grad_acc_step: 32
-val_interval: 8000
+val_interval: 10000
 train_task_names:
   - arxiv
   - cora_node
@@ -22,16 +22,16 @@ train_task_names:
   - ml1m
   - products
 sample_size_per_task:
-  - 65000
-  - 1000
-  - 30000
+  - 90000
   - 2000
-  - 70000
-  - 8000
+  - 40000
+  - 3000
+  - 80000
+  - 12000
+  - 80000
+  - 130000
+  - 130000
   - 50000
-  - 100000
-  - 100000
-  - 30000
 hops:
   - 3
   - 3

@@ -143,7 +143,7 @@ def main(params):
                                             split="val",
                                             hop=hop,
                                             max_nodes_per_hop=max_nodes_per_hop,
-                                            sample_size=10,
+                                            sample_size=500,
                                             num_workers=params.num_workers,
                                             way=way,
                                             instruction=instruct,
