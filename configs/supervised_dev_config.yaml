@@ -2,7 +2,7 @@ run_mode: "ft"
 load_model: True
 load_dir: "./cache_data/best_ckpt_3.pth"
 last_epochs: 0
-num_epochs: 0
+num_epochs: 1
 mode: "autoencoder"
 batch_size: 1
 lr: 0.0001
