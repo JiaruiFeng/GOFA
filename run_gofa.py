@@ -123,7 +123,6 @@ def main(params):
         train_task = GOFAFineTuneTaskWrapper(train_tasks,
                                             root=params.data_root_path,
                                             split="train",
-                                            save_name="ft_0",
                                             hop=params.hops,
                                             max_nodes_per_hop=params.train_max_nodes_per_hops,
                                             sample_size=params.sample_size_per_task,
@@ -133,7 +132,7 @@ def main(params):
                                             instruction=params.instructs,
                                             selection=params.selections,
                                             save_data=True,
-                                            from_saved=True,
+                                            from_saved=False,
                                             fast_data_load=True,)
 
 
@@ -148,7 +147,7 @@ def main(params):
                                             way=way,
                                             instruction=instruct,
                                             selection=selection, save_data=True,
-                                            from_saved=False,) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
+                                            from_saved=True,) for task_name, hop, max_nodes_per_hop, way, instruct, selection in
                                             zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops,
                                                 params.inf_ways, params.inf_instructs, params.inf_selections)]
 
@@ -162,7 +161,7 @@ def main(params):
                                             way=way,
                                             instruction=instruct,
                                             selection=selection, save_data=True,
-                                            from_saved=False) for task_name, hop, max_nodes_per_hop, way, instruct, selection, inf_sample_size in
+                                            from_saved=True) for task_name, hop, max_nodes_per_hop, way, instruct, selection, inf_sample_size in
                                             zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops,
                                                 params.inf_ways, params.inf_instructs, params.inf_selections, params.inf_sample_size_per_task)]
 
