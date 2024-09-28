@@ -9,7 +9,7 @@ lr: 0.0001
 l2: 0.1
 train_data_multiples: 1.0
 grad_acc_step: 32
-val_interval: 10000
+val_interval:
 train_task_names:
   - arxiv
   - cora_node
