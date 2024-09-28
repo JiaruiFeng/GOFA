@@ -172,3 +172,12 @@ inf_selections:
   - False
 
 dec_lora: True
+
+save_model:
+  save: True
+  steps:
+  monitor: False
+  time: 5
+  epochs:
+  top_k: -1
+  last: True

@@ -131,8 +131,8 @@ def main(params):
                                             num_workers=params.num_workers,
                                             instruction=params.instructs,
                                             selection=params.selections,
-                                            save_data=False,
-                                            from_saved=False,
+                                            save_data=True,
+                                            from_saved=True,
                                             fast_data_load=True,)
 
 
