@@ -1,6 +1,6 @@
 run_mode: "ft"
 load_model: True
-load_dir: "./cache_data/best_ckpt_3.pth"
+load_dir: "saved_exp/2024-09-26_00:13:58.388633_395/best_ckpt.pth"
 last_epochs: 0
 num_epochs: 1
 mode: "autoencoder"
@@ -22,16 +22,16 @@ train_task_names:
   - ml1m
   - products
 sample_size_per_task:
-  - 90000
+  - 30000
   - 2000
-  - 40000
+  - 10000
+  - 1000
+  - 10000
   - 3000
-  - 80000
-  - 12000
-  - 80000
-  - 130000
-  - 130000
-  - 50000
+  - 10000
+  - 10000
+  - 100000
+  - 8000
 hops:
   - 3
   - 3
