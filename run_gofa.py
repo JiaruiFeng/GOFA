@@ -165,7 +165,6 @@ def main(params):
                                             zip(eval_tasks, params.inf_hops, params.inf_max_nodes_per_hops,
                                                 params.inf_ways, params.inf_instructs, params.inf_selections, params.inf_sample_size_per_task)]
 
-        train_task.data_multiple = 100
         eval_metric_names, evaluators = get_evaluators(eval_tasks, task_types="QA")
         evlter = evaluators + evaluators
 
