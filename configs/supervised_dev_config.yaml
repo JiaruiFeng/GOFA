@@ -1,8 +1,8 @@
 run_mode: "ft"
 load_model: True
-load_dir: "saved_exp/2024-09-28_07:20:18.985042_618/best_ckpt.pth"
+load_dir: "saved_exp/2024-09-29_00:42:04.089850_354/best_ckpt.pth"
 last_epochs: 0
-num_epochs: 1
+num_epochs: 0
 mode: "autoencoder"
 batch_size: 1
 lr: 0.0001
@@ -96,16 +96,16 @@ eval_task_names:
   - fb15k237
   - products
 
-inf_sample_size_per_task:
-  - 500
-  - 500
-  - 500
-  - 500
-  - 500
-  - 500
-  - 500
-  - 500
-  - 500
+#inf_sample_size_per_task:
+#  - 500
+#  - 500
+#  - 500
+#  - 500
+#  - 500
+#  - 500
+#  - 500
+#  - 500
+#  - 500
 #inf_sample_size_per_task:
 #  - 15000
 #  - 1.0
