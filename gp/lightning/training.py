@@ -68,6 +68,7 @@ def lightning_fit(
         accumulate_grad_batches=grad_acc_step, val_check_interval=val_interval
     )
     trainer.fit(model, datamodule=data_module, ckpt_path=ckpt_path)
+    model.model.save_partial(model.model.save_dir + "/save_ckpt.pth")
     if load_best:
         model_dir = trainer.checkpoint_callback.best_model_path
         deep_speed = False
